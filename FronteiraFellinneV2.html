@@ -124,9 +124,9 @@
   
   <div id="subcategorias" class="subtabs">
     <div class="tab" onclick="mostrarAba(0)">Fronteira</div>
-    <div class="tab" onclick="mostrarAba(1)">ICMS</div>
-    <div class="tab" onclick="mostrarAba(2)">Retirar Pontos</div>
-	<div class="tab" onclick="mostrarAba(3)">CARREGAR XML</div>
+   <!--  <div class="tab" onclick="mostrarAba(1)">ICMS</div>-->
+    <div class="tab" onclick="mostrarAba(1)">Retirar Pontos</div>
+	<!-- <div class="tab" onclick="mostrarAba(3)">CARREGAR XML</div>-->
   </div>
   
  
@@ -155,7 +155,7 @@
     <div class="campo"><strong>Resultado:</strong> <span id="resultadoFronteira"></span></div>
   </div>
 
-  <div id="abaICMS" class="tab-content">
+  <!--<div id="abaICMS" class="tab-content">
     <h2>Soma ICMS NFe</h2>
 	<button onclick="limparCampos()">Limpar Campos</button>
   <div id="itensValores" ">
@@ -174,7 +174,7 @@
   <button type="button" onclick="enviarSomaParaIPI()">Colocar IPI</button><br><br>
   <button type="button" onclick="enviarSomaParaTotalProduto()">Colocar TotalProduto</button><br><br>
   <h3 id="somaItens"></h3>
-  </div>
+  </div>-->
 
   <div id="abaPontos" class="tab-content">
     <h2>Remover Pontos de Número</h2>
@@ -212,7 +212,7 @@ function carregarHTMLLocal() {
     const conteudoDinamico = document.getElementById('abaCarregarXML');
     conteudoDinamico.innerHTML = ''; // Limpa qualquer conteúdo existente
 
-    fetch('SomaICMS_XML.html.html') // Substitua "arquivo.html" pelo caminho do arquivo local
+    fetch('cclX.html') // Substitua "arquivo.html" pelo caminho do arquivo local
         .then(response => {
             if (!response.ok) {
                 throw new Error('Erro ao carregar o arquivo.');
