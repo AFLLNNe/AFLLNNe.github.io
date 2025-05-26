@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processador de XML NFe</title>
+    <style>
+        /* Estilização para riscar linhas marcadas */
+        .strikethrough {
+            text-decoration: line-through;
+        }
+        /* Estilização para ocultar linhas riscadas quando necessário */
+        .hidden {
+            display: none;
+        }
+        /* Estilização da caixa de resumo ao lado da tabela */
+        .summary-box {
+            border: 1px solid black;
+            padding: 10px;
+            margin-left: 20px;
+            display: inline-block;
+            vertical-align: top;
+        }
+    </style>
+    <script>
+        let itemData = {}; // Objeto global que armazenará os dados dos itens agrupados por NCM e pICMS
+
+        function processXML() {
+            const fileInput = document.getElementById("xmlFile");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Por favor, selecione um arquivo XML.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const xmlText = event.target.result;
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+                const tipo = document.getElementById("tipoEmpresa").value;
+                const empresaNode = xmlDoc.getElementsByTagName(tipo)[0];
+
+                const cnpj = empresaNode?.getElementsByTagName("CNPJ")[0]?.textContent || "Não encontrado";
+                const xNome = empresaNode?.getElementsByTagName("xNome")[0]?.textContent || "Não encontrado";
+                const nNF = xmlDoc.getElementsByTagName("nNF")[0]?.textContent || "Não encontrado";
+                let infNFeId = xmlDoc.getElementsByTagName("infNFe")[0]?.getAttribute("Id") || "Não encontrado";
+                infNFeId = infNFeId.replace("NFe", ""); 
+
+                document.getElementById("empresaInfo").innerHTML = `
+                    <strong>Empresa:</strong> ${xNome} | <strong>CNPJ:</strong> ${cnpj} <br>
+                    <strong>Nota:</strong> ${nNF} | <strong>Chave:</strong> ${infNFeId}
+                `;
+
+                const items = xmlDoc.getElementsByTagName("det");
+                const icmsData = {};
+                itemData = {};
+
+                const resultTable = document.getElementById("resultTable");
+                resultTable.innerHTML = "";
+
+                for (let item of items) {
+                    const ncm = item.getElementsByTagName("NCM")[0]?.textContent || "N/A";
+                    const picms = parseFloat(item.getElementsByTagName("pICMS")[0]?.textContent) || 0;
+                    const vicms = parseFloat(item.getElementsByTagName("vICMS")[0]?.textContent) || 0;
+                    const vipi = parseFloat(item.getElementsByTagName("vIPI")[0]?.textContent) || 0;
+                    const quantidade = parseFloat(item.getElementsByTagName("qCom")[0]?.textContent) || 0;
+
+                    const descricao = item.getElementsByTagName("xProd")[0]?.textContent || "Sem descrição";
+                    const valorUnitario = parseFloat(item.getElementsByTagName("vUnCom")[0]?.textContent) || 0;
+                    const valorTotal = parseFloat(item.getElementsByTagName("vProd")[0]?.textContent) || 0;
+
+                    if (!itemData[ncm]) {
+                        itemData[ncm] = {};
+                    }
+                    if (!itemData[ncm][picms]) {
+                        itemData[ncm][picms] = [];
+                    }
+                    itemData[ncm][picms].push({ descricao, quantidade, valorUnitario, valorTotal, vicms, vipi });
+
+                    const key = `${ncm}-${picms}`;
+                    if (!icmsData[key]) {
+                        icmsData[key] = { ncm, picms, vicms: 0, vipi: 0, quantidade: 0 };
+                    }
+                    icmsData[key].vicms += vicms;
+                    icmsData[key].vipi += vipi;
+                    icmsData[key].quantidade += quantidade;
+                }
+
+                const sortedData = Object.values(icmsData).sort((a, b) => {
+                    if (a.ncm !== b.ncm) {
+                        return a.ncm.localeCompare(b.ncm, 'en', { numeric: true });
+                    }
+                    return a.picms - b.picms;
+                });
+
+                sortedData.forEach(({ ncm, picms, vicms, vipi, quantidade }) => {
+                    const rowId = `row-${ncm}-${picms}`;
+                    const row = `<tr id="${rowId}" onclick="showItems('${ncm}')">
+                        <td>${ncm}</td>
+                        <td>${picms.toFixed(2)}</td>
+                        <td>${vicms.toFixed(2)}</td>
+                        <td>${vipi.toFixed(2)}</td>
+                        <td>${quantidade.toFixed(2)}</td>
+                        <td><button onclick="event.stopPropagation(); toggleStrikethrough('${rowId}')">Riscado</button></td>
+                    </tr>`;
+                    resultTable.innerHTML += row;
+                });
+            };
+
+            reader.readAsText(file);
+        }
+
+        function toggleStrikethrough(rowId) {
+            const row = document.getElementById(rowId);
+            row.classList.toggle("strikethrough");
+        }
+
+        function toggleHiddenRows() {
+            const rows = document.querySelectorAll(".strikethrough");
+            rows.forEach(row => row.classList.toggle("hidden"));
+        }
+
+        function showItems(ncm) {
+            const itemTable = document.getElementById("itemTable");
+            const totalSumBox = document.getElementById("totalSumBox");
+            itemTable.innerHTML = "";
+            totalSumBox.innerHTML = "";
+
+            if (!itemData[ncm]) {
+                itemTable.innerHTML = "<tr><td colspan='7'>Nenhum item encontrado para este NCM.</td></tr>";
+                totalSumBox.innerHTML = "<strong>Total:</strong> R$ 0.00";
+                return;
+            }
+
+            let totalPorPICMS = {};
+
+            Object.entries(itemData[ncm]).forEach(([picms, itens]) => {
+                let totalSum = 0;
+
+                itens.forEach(({ descricao, quantidade, valorUnitario, valorTotal, vicms, vipi }) => {
+                    totalSum += valorTotal;
+
+                    const row = `<tr>
+                        <td>${descricao}</td>
+                        <td>${quantidade.toFixed(2)}</td>
+                        <td>${valorUnitario.toFixed(2)}</td>
+                        <td>${valorTotal.toFixed(2)}</td>
+                        <td>${picms}</td>
+                        <td>${vicms.toFixed(2)}</td>
+                        <td>${vipi.toFixed(2)}</td>
+                    </tr>`;
+                    itemTable.innerHTML += row;
+                });
+
+                totalPorPICMS[picms] = totalSum;
+            });
+
+            Object.entries(totalPorPICMS).forEach(([picms, total]) => {
+                totalSumBox.innerHTML += `<div><strong>Total para pICMS ${picms}:</strong> R$ ${total.toFixed(2)}</div>`;
+            });
+        }
+    </script>
+</head>
+<body>
+    <h2>Importar XML da Nota Fiscal Eletrônica</h2>
+    
+    <input type="file" id="xmlFile" accept=".xml">
+    <button onclick="processXML()">Processar</button>
+    <button onclick="toggleHiddenRows()">Ocultar/Mostrar Riscados</button>
+
+    <label for="tipoEmpresa">Selecionar dados:</label>
+    <select id="tipoEmpresa">
+        <option value="emit">Emitente</option>
+        <option value="dest">Destinatário</option>
+    </select>
+
+    <h3 id="empresaInfo"></h3>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>NCM</th>
+                <th>pICMS</th>
+                <th>Soma vICMS</th>
+                <th>Soma vIPI</th>
+                <th>Soma Quantidade</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody id="resultTable"></tbody>
+    </table>
+
+    <div class="summary-box" id="totalSumBox"></div>
+
+    <h3>Itens relacionados ao NCM selecionado</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Descrição</th>
+                <th>Quantidade</th>
+                <th>Valor Unitário</th>
+                <th>Valor Total</th>
+                <th>pICMS</th>
+                <th>vICMS</th>
+                <th>vIPI</th>
+            </tr>
+        </thead>
+        <tbody id="itemTable"></tbody>
+    </table>
+</body>
+</html>

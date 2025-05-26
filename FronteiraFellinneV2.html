@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora Tributária</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      background-color: #eee;
+      border: 1px solid #ccc;
+      border-bottom: none;
+      margin-right: 5px;
+    }
+
+    .tab.active {
+      background-color: white;
+      font-weight: bold;
+      border-bottom: 2px solid white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .campo {
+      margin-bottom: 10px;
+    }
+
+    .linha-campos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .linha-campos > div {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* #limparFixado {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+	  <button id="limparFixado" onclick="limparCampos()">Limpar Campos</button>
+    }
+
+    #limparFixado:hover {
+      background-color: #cc0000;
+    }*/
+	
+	 .subtabs {
+      margin-top: 10px;
+      display: none;
+      margin-left: 20px;
+      display: flex;  /* Usando flexbox para alinhar os botões das subcategorias */
+      gap: 10px;  /* Adicionando um espaçamento entre os botões */
+    }
+
+    .subtab {
+      padding: 8px 15px;
+      cursor: pointer;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .subtab.active {
+      background-color: #d0d0d0;
+      font-weight: bold;
+    }
+	.button-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .button-container button {
+      padding: 10px 20px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .button-container button:hover {
+      background-color: #45a049;
+    }
+	
+  </style>
+</head>
+<body>
+	<div style="position: absolute; top: 10px; right: 20px; font-size: 14px; color: #333;">
+  AAC by Alexandre Fellinne [@afellinne]
+  <p>
+  auxiliar em atividades contábeis
+</div>
+  <!-- Abas -->
+  <!-- <button onclick="toggleSubcategorias()">CALCULO FRONTEIRA [FISCAL]</button>-->
+  
+  <div id="subcategorias" class="subtabs">
+    <div class="tab" onclick="mostrarAba(0)">Fronteira</div>
+    <div class="tab" onclick="mostrarAba(1)">ICMS</div>
+    <div class="tab" onclick="mostrarAba(2)">Retirar Pontos</div>
+	<div class="tab" onclick="mostrarAba(3)">CARREGAR XML</div>
+  </div>
+  
+ 
+  <!-- Conteúdo das abas -->
+  
+  <div id="abaFronteira" class="tab-content active">
+    <h2>Cálculo Fronteira</h2>
+    <div class="campo"><label>Valor Total do Produto: <input type="number" id="valorProduto" step="0.01"></label></div>
+    <div id="extras" style="display: none;">
+      <div class="campo"><label>IPI: <input type="number" id="ipi" step="0.01"></label></div>
+      <div class="campo"><label>Frete: <input type="number" id="frete" step="0.01"></label></div>
+      <div class="campo"><label>Outras Despesas: <input type="number" id="outras" step="0.01"></label></div>
+    </div>
+    <div class="campo"><label>MVA (%): <input type="text" id="mva"></label></div>
+<div style="display: flex; align-items: center; gap: 8px;">
+    <label for="aliquota">Alíquota Interna (%):</label>
+    <input type="text" id="aliquota">
+    <button type="button" onclick="setAliquota('20,5')">20,5%</button>
+    <button type="button" onclick="setAliquota('25')">25%</button>
+  </div>
+
+    <div class="campo"><label>BICMS: <input type="number" id="bicsm" step="0.01"></label></div>
+    <button onclick="limparCampos()">Limpar Campos</button>
+	<button onclick="toggleExtras()">Mostrar/Esconder Itens (IPI, Frete, Outras)</button>
+	<button onclick="calcularFronteira()">Calcular</button>
+    <div class="campo"><strong>Resultado:</strong> <span id="resultadoFronteira"></span></div>
+  </div>
+
+  <div id="abaICMS" class="tab-content">
+    <h2>Soma ICMS NFe</h2>
+	<button onclick="limparCampos()">Limpar Campos</button>
+  <div id="itensValores" ">
+	
+    <label for="item1">Item 1 (R$): </label><input type="number" step="0.01" id="item1"><br><br>
+    <label for="item2">Item 2 (R$): </label><input type="number" step="0.01" id="item2"><br><br>
+    <label for="item3">Item 3 (R$): </label><input type="number" step="0.01" id="item3"><br><br>
+    <label for="item4">Item 4 (R$): </label><input type="number" step="0.01" id="item4"><br><br>
+    <label for="item5">Item 5 (R$): </label><input type="number" step="0.01" id="item5"><br><br>
+  </div>
+
+  <div id="itensValoresExtras" style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 10px;"></div>
+  <button type="button" onclick="adicionarCampoExtra()">Adicionar Campo</button><br><br>
+  <button type="button" onclick="calcularSomaItens()">Calcular Soma dos Itens</button><br><br>
+  <button type="button" onclick="enviarSomaParaBICMS()">Colocar ICMS</button><br><br>
+  <button type="button" onclick="enviarSomaParaIPI()">Colocar IPI</button><br><br>
+  <button type="button" onclick="enviarSomaParaTotalProduto()">Colocar TotalProduto</button><br><br>
+  <h3 id="somaItens"></h3>
+  </div>
+
+  <div id="abaPontos" class="tab-content">
+    <h2>Remover Pontos de Número</h2>
+    <div class="campo"><label>Digite o número com pontos: <input type="text" id="numeroComPontos"></label></div>
+    <button onclick="removerPontos()">Remover Pontos</button>
+	<button onclick="limparCampos()">Limpar Campos</button>
+    <div class="campo"><strong>Resultado:</strong> <span id="numeroSemPontos"></span></div>
+	<button onclick="copiarTextoSemPontos()">Copiar Texto</button>
+	</p>
+	<p> ------------------------------------------------------------<p>
+	</p>
+	
+  </div>
+  
+  <div id="abaCarregarXML" class="tab-content">
+  </div>
+  <!-- Contêiner para o conteúdo carregado dinamicamente -->
+  <div id="conteudoDinamico"></div>
+<script>
+function mostrarAba(index) {
+    const tabs = document.querySelectorAll('.tab');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+        contents[i].classList.toggle('active', i === index);
+    });
+
+    if (index === 3) { // Índice da aba CARREGAR XML
+        carregarHTMLLocal();
+    }
+}
+
+function carregarHTMLLocal() {
+    const conteudoDinamico = document.getElementById('abaCarregarXML');
+    conteudoDinamico.innerHTML = ''; // Limpa qualquer conteúdo existente
+
+    fetch('cclX.html') // Substitua "arquivo.html" pelo caminho do arquivo local
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao carregar o arquivo.');
+            }
+            return response.text();
+        })
+        .then(data => {
+            conteudoDinamico.innerHTML = data; // Insere o conteúdo carregado
+        })
+        .catch(error => {
+            conteudoDinamico.innerHTML = `<p style="color: red;">${error.message}</p>`;
+        });
+}
+</script>
+
+
+
+
+
+  <script>
+	let campoExtraIndex = 6
+    function mostrarAba(index) {
+      const tabs = document.querySelectorAll('.tab');
+      const contents = document.querySelectorAll('.tab-content');
+
+      tabs.forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+        contents[i].classList.toggle('active', i === index);
+      });
+    }
+
+    function toggleExtras() {
+      const extras = document.getElementById('extras');
+      extras.style.display = extras.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleExtras2() {
+      const extras = document.getElementById('extras2');
+      extras.style.display = extras.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function formatPercent(value) {
+      return parseFloat(value.replace('%', '').replace(',', '.')) / 100;
+    }
+
+    function calcularFronteira() {
+      const valorProduto = parseFloat(document.getElementById('valorProduto').value) || 0;
+      const ipi = parseFloat(document.getElementById('ipi').value) || 0;
+      const frete = parseFloat(document.getElementById('frete').value) || 0;
+      const outras = parseFloat(document.getElementById('outras').value) || 0;
+      const mva = formatPercent(document.getElementById('mva').value);
+      const aliquota = formatPercent(document.getElementById('aliquota').value);
+      const bicsm = parseFloat(document.getElementById('bicsm').value) || 0;
+
+      const base = valorProduto + ipi + frete + outras;
+      const valorComMVA = base + (base * mva);
+      const resultado = (valorComMVA * aliquota) - bicsm;
+
+      document.getElementById('resultadoFronteira').innerText = resultado.toFixed(2);
+    }
+
+    function calcularICMS() {
+      const valorProduto = parseFloat(document.getElementById('valorProduto2').value) || 0;
+      const ipi = parseFloat(document.getElementById('ipi2').value) || 0;
+      const frete = parseFloat(document.getElementById('frete2').value) || 0;
+      const outras = parseFloat(document.getElementById('outras2').value) || 0;
+      const mva = formatPercent(document.getElementById('mva2').value);
+      const aliquota = formatPercent(document.getElementById('aliquota2').value);
+      const bicsm = parseFloat(document.getElementById('bicsm2').value) || 0;
+
+      const base = valorProduto + ipi + frete + outras;
+      const valorComMVA = base + (base * mva);
+      const resultado = (valorComMVA * aliquota) - bicsm;
+
+      document.getElementById('resultadoICMS').innerText = resultado.toFixed(2);
+    }
+
+    function removerPontos() {
+      const valor = document.getElementById('numeroComPontos').value;
+      const limpo = valor.replace(/\./g, '');
+      document.getElementById('numeroSemPontos').innerText = limpo;
+    }
+
+   function limparCampos() {
+  document.querySelectorAll('input').forEach(input => input.value = '');
+  document.querySelectorAll('span[id^="resultado"]').forEach(span => span.innerText = '');
+  document.getElementById('numeroSemPontos').innerText = '';
+}
+	function calcularSomaItens() {
+      let soma = 0;
+      for (let i = 1; i <= 5; i++) {
+        const valor = parseFloat(document.getElementById('item' + i).value) || 0;
+        soma += valor;
+      }
+      const extras = document.querySelectorAll('.campo-extra');
+      extras.forEach(input => {
+        const val = parseFloat(input.value) || 0;
+        soma += val;
+      });
+      document.getElementById('somaItens').innerText = 'Soma dos Itens: R$ ' + soma.toFixed(2);
+    }
+
+    function adicionarCampoExtra() {
+  const container = document.getElementById('itensValoresExtras');
+
+  const div = document.createElement('div');
+  div.style.display = 'flex';
+  div.style.flexDirection = 'column';
+
+  const label = document.createElement('label');
+  label.innerText = `Item ${campoExtraIndex}`;
+  label.setAttribute('for', 'item' + campoExtraIndex);
+
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.step = '0.01';
+  input.id = 'item' + campoExtraIndex;
+  input.className = 'campo-extra';
+  input.placeholder = `R$`;
+
+  div.appendChild(label);
+  div.appendChild(input);
+  container.appendChild(div);
+
+  campoExtraIndex++;
+}
+	function enviarSomaParaBICMS() {
+  let soma = 0;
+  for (let i = 1; i <= 5; i++) {
+    const valor = parseFloat(document.getElementById('item' + i).value) || 0;
+    soma += valor;
+  }
+  const extras = document.querySelectorAll('.campo-extra');
+  extras.forEach(input => {
+    const val = parseFloat(input.value) || 0;
+    soma += val;
+  });
+
+  document.getElementById('bicsm').value = soma.toFixed(2);
+   mostrarAba(0);
+}
+	function enviarSomaParaIPI() {
+  let soma = 0;
+  for (let i = 1; i <= 5; i++) {
+    const valor = parseFloat(document.getElementById('item' + i).value) || 0;
+    soma += valor;
+  }
+  const extras = document.querySelectorAll('.campo-extra');
+  extras.forEach(input => {
+    const val = parseFloat(input.value) || 0;
+    soma += val;
+  });
+
+  document.getElementById('ipi').value = soma.toFixed(2);
+   mostrarAba(0);
+}
+	function enviarSomaParaTotalProduto() {
+  let soma = 0;
+  for (let i = 1; i <= 5; i++) {
+    const valor = parseFloat(document.getElementById('item' + i).value) || 0;
+    soma += valor;
+  }
+  const extras = document.querySelectorAll('.campo-extra');
+  extras.forEach(input => {
+    const val = parseFloat(input.value) || 0;
+    soma += val;
+  });
+
+  document.getElementById('valorProduto').value = soma.toFixed(2);
+   mostrarAba(0);
+}
+	function copiarTextoSemPontos() {
+  const texto = document.getElementById('numeroSemPontos').innerText;
+  navigator.clipboard.writeText(texto)
+  /*if (texto) {
+    navigator.clipboard.writeText(texto)
+      .then(() => alert('Texto copiado para a área de transferência!'))
+      .catch(err => alert('Erro ao copiar: ' + err));
+  } else {
+    alert('Nada para copiar!');
+  }*/
+}
+	function setAliquota(valor) {
+  document.getElementById('aliquota').value = valor;
+}
+	function toggleSubcategorias() {
+
+      const subcategorias = document.getElementById('subcategorias');
+      // Alterna entre mostrar e esconder as subcategorias
+      if (subcategorias.style.display === 'none' || subcategorias.style.display === '') {
+        subcategorias.style.display = 'block';
+      } else {
+        subcategorias.style.display = 'none';
+      }
+    }
+
+// Função que carrega as páginas assim que a página principal é aberta
+	const paginas = ["calculoXml.html",""];
+    function carregarPaginasAutomaticamente() {
+            paginas.forEach(arquivo => {
+                fetch(arquivo) // Busca o arquivo localmente
+                    .then(response => response.text()) // Converte para texto
+                    .then(data => {
+                        let novoConteudo = document.createElement("div"); // Cria um novo bloco de conteúdo
+                        novoConteudo.classList.add("conteudo"); // Adiciona estilo
+                        novoConteudo.innerHTML = data; // Insere o conteúdo
+                        document.getElementById("areaDeConteudo").appendChild(novoConteudo); // Adiciona na página principal
+                    })
+                    .catch(error => console.error("Erro ao carregar a página:", error));
+            });
+        }
+	
+  </script>
+
+</body>
+</html>
