@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Abas com conteúdo externo</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid #ccc;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .tab {
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    background: #eee;
+    margin-right: 5px;
+    user-select: none;
+  }
+  .tab.active {
+    background: white;
+    font-weight: bold;
+    border-top: 3px solid #007BFF;
+  }
+  #content {
+    border: 1px solid #ccc;
+    padding: 15px;
+    min-height: 200px;
+    background: white;
+  }
+</style>
+</head>
+<body>
+
+<h2>Abas com conteúdo carregado de outras páginas</h2>
+
+<div class="tabs">
+  <div class="tab active" data-page="FronteiraFellinneV2.html">Fronteira Cálculos</div>
+  <div class="tab" data-page="SomaICMS_XML.html">Soma ICMS XML</div>
+  <div class="tab" data-page="Detalhe_CFOPs.html">Busca CFOP</div>
+</div>
+
+<div id="content">
+  <!-- Conteúdo carregado aparecerá aqui -->
+  Carregando conteúdo da Aba 1...
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const contentDiv = document.getElementById('content');
+
+  async function loadPage(page) {
+    contentDiv.innerHTML = 'Carregando...';
+    try {
+      const res = await fetch(page);
+      if (!res.ok) throw new Error('Erro ao carregar a página.');
+      const html = await res.text();
+      contentDiv.innerHTML = html;
+    } catch (e) {
+      contentDiv.innerHTML = `<p style="color:red;">${e.message}</p>`;
+    }
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Remove active de todas as abas
+      tabs.forEach(t => t.classList.remove('active'));
+      // Ativa a aba clicada
+      tab.classList.add('active');
+      // Carrega conteúdo da página associada
+      const page = tab.getAttribute('data-page');
+      loadPage(page);
+    });
+  });
+
+  // Carrega conteúdo da primeira aba automaticamente ao abrir a página
+  loadPage(tabs[0].getAttribute('data-page'));
+</script>
+
+</body>
+</html>
