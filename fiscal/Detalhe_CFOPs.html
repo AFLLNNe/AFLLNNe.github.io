@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar na Tabela</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Buscar na Tabela</h1>
+    <input type="text" id="searchInput" placeholder="Digite o código para buscar" />
+    <button onclick="searchInTable()">Buscar</button>
+    <div id="results"></div>
+
+    <script>
+        async function searchInTable() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = "Carregando...";
+
+            try {
+                // Carrega o conteúdo da página externa
+                const response = await fetch('bancoCFOP.html'); // Substitua 'pagina.html' pelo caminho da página com a tabela
+                const html = await response.text();
+
+                // Cria um elemento DOM para processar o HTML carregado
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Encontra a tabela no conteúdo carregado
+                const rows = doc.querySelectorAll('tr');
+                const matchingRows = Array.from(rows).filter(row => 
+                    row.textContent.includes(searchTerm)
+                );
+
+                if (matchingRows.length > 0) {
+                    // Gera o HTML com as linhas correspondentes
+                    const table = document.createElement('table');
+                    matchingRows.forEach(row => {
+                        table.appendChild(row.cloneNode(true));
+                    });
+                    resultsDiv.innerHTML = '';
+                    resultsDiv.appendChild(table);
+                } else {
+                    resultsDiv.innerHTML = "Nenhum resultado encontrado.";
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = "Erro ao carregar os dados: " + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
