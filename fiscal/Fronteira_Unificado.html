@@ -62,6 +62,7 @@
 <script>
   const tabs = document.querySelectorAll('.tab');
   const iframes = document.querySelectorAll('iframe');
+  const iframe = document.getElementById("iframe4");
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -81,6 +82,14 @@
       });
     });
   });
+
+  // Evitar recarregar o iframe com o link inicial após o login
+        iframe.onload = () => {
+            const currentSrc = iframe.contentWindow.location.href;
+            if (!currentSrc.includes("login")) {
+                console.log("Página de login concluída:", currentSrc);
+            }
+        };
 </script>
 
 </body>
