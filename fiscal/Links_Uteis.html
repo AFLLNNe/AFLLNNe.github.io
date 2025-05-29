@@ -8,29 +8,93 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
         }
-        a {
-            display: block;
-            margin: 10px 0;
-            color: blue;
+
+        .link-card {
+            width: 250px;
+            text-align: center;
             text-decoration: none;
+            color: #333;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
-        a:hover {
-            text-decoration: underline;
+
+        .link-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .link-card img {
+            width: 100%;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .link-card h3 {
+            font-size: 1.2em;
+            margin: 15px 0;
+        }
+
+        .link-card p {
+            font-size: 0.9em;
+            color: #666;
+            padding: 0 10px 20px;
         }
     </style>
 </head>
 <body>
     <h1></h1>
     <p></p>
-    <a href="https://efisco.sefaz.pe.gov.br/sfi_com_sca/PRMontarMenuAcesso" target="_blank" class="useful-link">e-Fisco</a>
-    <a href="https://www8.receita.fazenda.gov.br/SimplesNacional/Servicos/Grupo.aspx?grp=t&area=1" target="_blank" class="useful-link">Simples Nacional</a> 
-    <a href="https://app.econeteditora.com.br/app/lista-st" target="_blank" class="useful-link">NCM Econet</a>
-    <a href="https://www.fsist.com.br/" target="_blank" class="useful-link">FSist</a>
-    <a href="https://www.danfeonline.com.br/" target="_blank" class="useful-link">DANFE Online</a>
-    <a href="https://www.tributosmunicipais.com.br/NFE-Arcoverde/loginAction.do?operacao=carregarTelaInicial" target="_blank" class="useful-link">NFSE Prefeitura Arcoverde [PE]</a>
-    <a href="https://www.tributosmunicipais.com.br/NFE-buique/" target="_blank" class="useful-link">NFSE Prefeitura Buíque [PE]</a> 
-    <a href="" target="_blank" class="useful-link"></a> 
+    <a href="https://efisco.sefaz.pe.gov.br/sfi_com_sca/PRMontarMenuAcesso" target="_blank" class="link-card">
+        <img src="https://efisco.sefaz.pe.gov.br/sfi/pagina_ie/logo.png" alt="e-Fisco">
+        <h3>e-Fisco</h3>
+        <p></p>
+    </a>
+    
+    <a href="https://www8.receita.fazenda.gov.br/SimplesNacional/Servicos/Grupo.aspx?grp=t&area=1" target="_blank" class="link-card"> 
+        <img src="https://portalcontabilsc.com.br/wp-content/uploads/2017/01/LOGO-SIMPLES-NACIONAL.png" alt="Simples Nacional">
+        <h3>Simples Nacional</h3>
+        <p></p>
+    </a>    
+    
+    <a href="https://app.econeteditora.com.br/app/lista-st" target="_blank" class="link-card"> 
+        <img src="https://blog.econeteditora.com.br/wp-content/uploads/2018/11/cropped-logo_econet_slim-1.png" alt="NCM Econet">
+        <h3>NCM Econet</h3>
+        <p></p>
+    </a>    
+ 
+    <a href="https://www.fsist.com.br/" target="_blank" class="link-card"> 
+        <img src="https://yt3.googleusercontent.com/ytc/AIdro_k6YE2IZJybx6mj1tD3GVShC3XF-pUNtWC29Y5dU9k1qg=s900-c-k-c0x00ffffff-no-rj" alt="FSist">
+        <h3>FSist</h3>
+        <p></p>
+    </a>        
+
+    <a href="https://www.danfeonline.com.br/" target="_blank" class="link-card"> 
+        <img src="https://img.icons8.com/?size=512&id=38893&format=png" alt="DANFE Online">
+        <h3>DANFE Online</h3>
+        <p></p>
+    </a>        
+       
+    <a href="https://www.tributosmunicipais.com.br/NFE-Arcoverde/loginAction.do?operacao=carregarTelaInicial" target="_blank" class="link-card"> >
+        <img src="https://www.arcoverde.pe.gov.br/imagens/logo2025.png" alt="NFSE Prefeitura Arcoverde [PE]">
+        <h3>NFSE Prefeitura Arcoverde [PE]</h3>
+        <p></p>
+    </a>        
+    
+    <a href="https://www.tributosmunicipais.com.br/NFE-buique/" target="_blank" class="link-card"> 
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpoUGICH4Hnftxfqi7gymNFYcFEIdjmrassA&s" alt="NFSE Prefeitura Buíque [PE]">
+        <h3>NFSE Prefeitura Buíque [PE]</h3>
+        <p></p>
+    </a>           
+     
+    <a href="" target="_blank" class="link-card"> </a> 
     
 </body>
 </html>
