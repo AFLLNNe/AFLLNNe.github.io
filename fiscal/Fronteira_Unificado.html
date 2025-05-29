@@ -30,6 +30,20 @@
     padding: 0;
     height: 400px; /* altura fixa para o iframe */
   }
+  .useful-links-list {
+    list-style-type: none;
+    padding: 0;
+   }
+   .useful-link-item {
+     margin-bottom: 10px;
+   }
+   .useful-link {
+     text-decoration: none;
+     color: #007BFF;
+   }
+    .useful-link:hover {
+      text-decoration: underline;
+   }
   iframe {
     width: 100%;
     height: 125%;
@@ -49,20 +63,25 @@
   <div class="tab active" data-target="iframe1">Calculos Fronteira</div>
   <div class="tab" data-target="iframe2">Soma ICMS XML</div>
   <div class="tab" data-target="iframe3">Banco CFOP</div>
-  <div class="tab" data-target="iframe4">NCM ECONET</div>
+  <div class="tab" data-target="iframe4">LINKs UTEIS</div>
+    <h2>Links Úteis</h2>
+    <ul class="useful-links-list">
+      <li class="useful-link-item"><a href="https://app.econeteditora.com.br/app/lista-st" target="_blank" class="useful-link">NCM ECONET</a></li>
+    </ul>
+  
 </div>
 
 <div class="tab-content">
   <iframe id="iframe1" class="active" src="FronteiraFellinneV2.html"></iframe>
   <iframe id="iframe2" src="SomaICMS_XML.html"></iframe>
   <iframe id="iframe3" src="Detalhe_CFOPs.html"></iframe>
-  <iframe id="iframe4" src="https://app.econeteditora.com.br/app/lista-st"></iframe>
+  
 </div>
 
 <script>
   const tabs = document.querySelectorAll('.tab');
   const iframes = document.querySelectorAll('iframe');
-  const iframe = document.getElementById("iframe4");
+ // const iframe = document.getElementById("iframe4");
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -84,12 +103,12 @@
   });
 
   // Evitar recarregar o iframe com o link inicial após o login
-        iframe.onload = () => {
+      /*  iframe.onload = () => {
             const currentSrc = iframe.contentWindow.location.href;
             if (!currentSrc.includes("login")) {
                 console.log("Página de login concluída:", currentSrc);
             }
-        };
+        };*/
 </script>
 
 </body>
