@@ -1,112 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Faturamento</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        textarea, table {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        table {
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        .total {
-            font-weight: bold;
-        }
-        .error {
-            color: red;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora de Faturamento</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    textarea, table {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    table {
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .total {
+      font-weight: bold;
+    }
+    button.copy-btn {
+      margin-left: 5px;
+      padding: 3px 6px;
+      font-size: 0.9em;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <h1>Calculadora de Faturamento</h1>
-    <textarea id="inputData" rows="10" placeholder="Cole os dados aqui..."></textarea>
-    <button onclick="processData()">Processar Dados</button>
-    <p id="errorMessage" class="error"></p>
+  <h1>Calculadora de Faturamento PDF Questor</h1>
+  <textarea id="inputData" rows="10" placeholder="Cole os dados aqui..."></textarea>
+  <button onclick="processData()">Processar Dados</button>
+  <p id="errorMessage" style="color:red;"></p>
 
-    <table id="outputTable">
-        <thead>
-            <tr>
-                <th>Mês</th>
-                <th>Ano</th>
-                <th>Data</th>
-                <th>Faturado (R$)</th>
-                <th>30% à Vista</th>
-                <th>70% a Prazo</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-        <tfoot>
-            <tr>
-                <td colspan="3" class="total">Total</td>
-                <td id="totalFaturado" class="total">-</td>
-                <td id="totalVista" class="total">-</td>
-                <td id="totalPrazo" class="total">-</td>
-            </tr>
-        </tfoot>
-    </table>
+  <table id="outputTable">
+    <thead>
+      <tr>
+        <th>Mês</th>
+        <th>Ano</th>
+        <th>Data</th>
+        <th>Faturado (R$)</th>
+        <th>30% à Vista</th>
+        <th>70% a Prazo</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3" class="total">Total</td>
+        <td id="totalFaturado" class="total">-</td>
+        <td id="totalVista" class="total">-</td>
+        <td id="totalPrazo" class="total">-</td>
+      </tr>
+    </tfoot>
+  </table>
 
-    <script>
-        function processData() {
-            const input = document.getElementById('inputData').value.trim();
-            const rows = input.split('\n');
-            let totalFaturado = 0;
-            let totalVista = 0;
-            let totalPrazo = 0;
+<script>
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert(`Copiado: ${text}`);
+    }, () => {
+      alert('Erro ao copiar para a área de transferência');
+    });
+  }
 
-            const tableBody = document.querySelector('#outputTable tbody');
-            const errorMessage = document.getElementById('errorMessage');
-            tableBody.innerHTML = '';
-            errorMessage.textContent = '';
+  function processData() {
+    const input = document.getElementById('inputData').value.trim();
+    const rows = input.split('\n');
+    const errorMessage = document.getElementById('errorMessage');
+    errorMessage.textContent = '';
 
-            rows.forEach((row, index) => {
-                try {
-                    const match = row.match(/^([\wÀ-ú]+)\s(\d{4})\s([\d.,]+)$/);
-                    if (!match) throw new Error(`Linha ${index + 1} está em formato incorreto: "${row}"`);
+    let totalFaturado = 0;
+    let totalVista = 0;
+    let totalPrazo = 0;
 
-                    const [_, mes, ano, valor] = match;
-                    const faturado = parseFloat(valor.replace(/\./g, '').replace(',', '.'));
-                    const vista = faturado * 0.3;
-                    const prazo = faturado * 0.7;
-                    const data = `${('0' + (['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'].indexOf(mes.toLowerCase()) + 1)).slice(-2)}/${ano}`;
+    const tableBody = document.querySelector('#outputTable tbody');
+    tableBody.innerHTML = '';
 
-                    totalFaturado += faturado;
-                    totalVista += vista;
-                    totalPrazo += prazo;
+    rows.forEach((row, index) => {
+      const match = row.match(/^([\wÀ-ú]+)\s(\d{4})\s([\d.,]+)$/);
+      if (!match) {
+        errorMessage.textContent += `Linha ${index + 1} com formato incorreto: "${row}"\n`;
+        return;
+      }
+      const [, mes, ano, valor] = match;
+      const faturado = parseFloat(valor.replace(/\./g, '').replace(',', '.'));
+      const vista = faturado * 0.3;
+      const prazo = faturado * 0.7;
+      const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+      const data = `${('0' + (meses.indexOf(mes.toLowerCase()) + 1)).slice(-2)}/${ano}`;
 
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${mes}</td>
-                        <td>${ano}</td>
-                        <td>${data}</td>
-                        <td>${faturado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-                        <td>${vista.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-                        <td>${prazo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-                    `;
-                    tableBody.appendChild(tr);
-                } catch (error) {
-                    errorMessage.textContent += error.message + '\n';
-                }
-            });
+      totalFaturado += faturado;
+      totalVista += vista;
+      totalPrazo += prazo;
 
-            document.getElementById('totalFaturado').textContent = totalFaturado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('totalVista').textContent = totalVista.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('totalPrazo').textContent = totalPrazo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
-    </script>
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${mes}</td>
+        <td>${ano}</td>
+        <td>
+          <span>${data}</span>
+          <button class="copy-btn" onclick="copyToClipboard('${data}')">Copiar</button>
+        </td>
+        <td>${faturado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+        <td>
+          <span>${vista.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+          <button class="copy-btn" onclick="copyToClipboard('${vista.toFixed(2)}')">Copiar</button>
+        </td>
+        <td>
+          <span>${prazo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+          <button class="copy-btn" onclick="copyToClipboard('${prazo.toFixed(2)}')">Copiar</button>
+        </td>
+      `;
+      tableBody.appendChild(tr);
+    });
+
+    document.getElementById('totalFaturado').textContent = totalFaturado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('totalVista').textContent = totalVista.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('totalPrazo').textContent = totalPrazo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+</script>
 </body>
 </html>
