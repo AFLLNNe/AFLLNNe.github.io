@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Faturamento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea, table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .total {
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculadora de Faturamento</h1>
+    <textarea id="inputData" rows="10" placeholder="Cole os dados aqui..."></textarea>
+    <button onclick="processData()">Processar Dados</button>
+    <p id="errorMessage" class="error"></p>
+
+    <table id="outputTable">
+        <thead>
+            <tr>
+                <th>Mês</th>
+                <th>Ano</th>
+                <th>Data</th>
+                <th>Faturado (R$)</th>
+                <th>30% à Vista</th>
+                <th>70% a Prazo</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="total">Total</td>
+                <td id="totalFaturado" class="total">-</td>
+                <td id="totalVista" class="total">-</td>
+                <td id="totalPrazo" class="total">-</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <script>
+        function processData() {
+            const input = document.getElementById('inputData').value.trim();
+            const rows = input.split('\n');
+            let totalFaturado = 0;
+            let totalVista = 0;
+            let totalPrazo = 0;
+
+            const tableBody = document.querySelector('#outputTable tbody');
+            const errorMessage = document.getElementById('errorMessage');
+            tableBody.innerHTML = '';
+            errorMessage.textContent = '';
+
+            rows.forEach((row, index) => {
+                try {
+                    const match = row.match(/^([\wÀ-ú]+)\s(\d{4})\s([\d.,]+)$/);
+                    if (!match) throw new Error(`Linha ${index + 1} está em formato incorreto: "${row}"`);
+
+                    const [_, mes, ano, valor] = match;
+                    const faturado = parseFloat(valor.replace(/\./g, '').replace(',', '.'));
+                    const vista = faturado * 0.3;
+                    const prazo = faturado * 0.7;
+                    const data = `${('0' + (['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'].indexOf(mes.toLowerCase()) + 1)).slice(-2)}/${ano}`;
+
+                    totalFaturado += faturado;
+                    totalVista += vista;
+                    totalPrazo += prazo;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${mes}</td>
+                        <td>${ano}</td>
+                        <td>${data}</td>
+                        <td>${faturado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                        <td>${vista.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                        <td>${prazo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                } catch (error) {
+                    errorMessage.textContent += error.message + '\n';
+                }
+            });
+
+            document.getElementById('totalFaturado').textContent = totalFaturado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('totalVista').textContent = totalVista.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('totalPrazo').textContent = totalPrazo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+    </script>
+</body>
+</html>
