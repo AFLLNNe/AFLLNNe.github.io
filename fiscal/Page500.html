@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modify URL</title>
+    <script>
+        function modifyUrl() {
+            const inputUrl = document.getElementById('urlInput').value;
+            if (inputUrl.includes('pages=')) {
+                const modifiedUrl = inputUrl.replace(/pages=\d+/, 'pages=500');
+                document.getElementById('output').innerText = modifiedUrl;
+            } else {
+                document.getElementById('output').innerText = 'URL inválida ou sem o parâmetro "pages".';
+            }
+        }
+
+       /* function copyToClipboard() {
+            const output = document.getElementById('output').innerText;
+            if (output) {
+                navigator.clipboard.writeText(output).then(() => {
+                    alert('URL copiada para a área de transferência!');
+                }).catch(err => {
+                    alert('Erro ao copiar: ' + err);
+                });
+            } else {
+                alert('Nada para copiar!');
+            }
+        }*/
+    </script>
+</head>
+<body>
+    <h1>Modificar Parâmetro de URL</h1>
+    <label for="urlInput">Insira a URL:</label>
+    <input type="text" id="urlInput" style="width: 100%;" placeholder="Cole a URL aqui">
+    <button onclick="modifyUrl()">Modificar URL</button>
+    <h2>URL Modificada:</h2>
+    <p id="output" style="word-wrap: break-word; border: 1px solid #ddd; padding: 10px; background-color: #f9f9f9;"></p>
+    <button onclick="copyToClipboard()">Copiar URL</button>
+    <script>
+        // Test script load
+        console.log('Script carregado com sucesso!');
+    </script>
+</body>
+</html>
