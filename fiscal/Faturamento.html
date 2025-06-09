@@ -65,11 +65,23 @@
   </table>
 
 <script>
-   function limparCampos() {
-              document.querySelectorAll('inputData').forEach(input => input.value = '');
-              document.querySelectorAll('span[id^="resultado"]').forEach(span => span.innerText = '');
-              document.getElementById('numeroSemPontos').innerText = '';
-        }
+function limparCampos() {
+    // Limpa o campo de texto
+    document.getElementById('inputData').value = '';
+
+    // Limpa as mensagens de erro
+    document.getElementById('errorMessage').textContent = '';
+
+    // Remove todas as linhas da tabela (exceto cabeçalho e rodapé)
+    const tableBody = document.querySelector('#outputTable tbody');
+    tableBody.innerHTML = '';
+
+    // Reseta os totais no rodapé da tabela
+    document.getElementById('totalFaturado').textContent = '-';
+    document.getElementById('totalVista').textContent = '-';
+    document.getElementById('totalPrazo').textContent = '-';
+}
+
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
       //alert(`Copiado: ${text}`);
