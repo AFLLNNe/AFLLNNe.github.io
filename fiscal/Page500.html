@@ -27,6 +27,11 @@
                 alert('Nada para copiar!');
             }
         }
+        function limparCampos() {
+              document.querySelectorAll('input').forEach(input => input.value = '');
+              document.querySelectorAll('span[id^="resultado"]').forEach(span => span.innerText = '');
+              document.getElementById('numeroSemPontos').innerText = '';
+        }
     </script>
 </head>
 <body>
@@ -34,6 +39,7 @@
     <label for="urlInput">Insira a URL:</label>
     <input type="text" id="urlInput" style="width: 100%;" placeholder="Cole a URL aqui">
     <button onclick="modifyUrl()">Modificar URL</button>
+    <button onclick="limparCampos()">Limpar Campos</button>
     <h2>URL Modificada:</h2>
     <p id="output" style="word-wrap: break-word; border: 1px solid #ddd; padding: 10px; background-color: #f9f9f9;"></p>
     <button onclick="copyToClipboard()">Copiar URL</button>
