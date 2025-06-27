@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload XML de Notas Fiscais</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .file-input {
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload XML de Notas Fiscais</h1>
+        <input class="file-input" type="file" id="xmlFiles" multiple accept=".xml">
+        <button onclick="processFiles()">Processar Arquivos</button>
+        <h2>Resultados:</h2>
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Número da Nota</th>
+                    <th>Valor dos Produtos</th>
+                    <th>Total da Nota</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Results will be appended here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function processFiles() {
+            const files = document.getElementById('xmlFiles').files;
+            const tableBody = document.querySelector('#resultsTable tbody');
+            tableBody.innerHTML = '';
+
+            for (const file of files) {
+                try {
+                    const text = await file.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(text, 'application/xml');
+
+                    const nNF = xmlDoc.querySelector('nNF')?.textContent || 'N/A';
+                    const vProd = xmlDoc.querySelector('total > ICMSTot > vProd')?.textContent || 'N/A';
+                    const vNF = xmlDoc.querySelector('vNF')?.textContent || 'N/A';
+
+                    const row = `<tr>
+                                    <td>${nNF}</td>
+                                    <td>${vProd}</td>
+                                    <td>${vNF}</td>
+                                </tr>`;
+                    tableBody.innerHTML += row;
+                } catch (error) {
+                    console.error('Erro ao processar o arquivo:', file.name, error);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
