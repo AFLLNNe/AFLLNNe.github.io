@@ -51,6 +51,7 @@
                     <th>Número da Nota</th>
                     <th>Valor dos Produtos</th>
                     <th>Total da Nota</th>
+                    <th>Chave da Nota</th>
                 </tr>
             </thead>
             <tbody>
@@ -77,13 +78,16 @@
                     const nNF = xmlDoc.querySelector('nNF')?.textContent || 'N/A';
                     const vProd = parseFloat(xmlDoc.querySelector('total > ICMSTot > vProd')?.textContent || '0');
                     const vNF = parseFloat(xmlDoc.querySelector('vNF')?.textContent || '0');
+                    const infNFeId = xmlDoc.querySelector('infNFe')?.getAttribute('Id') || '';
+                    const chaveNota = infNFeId.startsWith('NFe') ? infNFeId.slice(3) : 'N/A';
 
-                    results.push({ nNF, vProd, vNF });
+                    results.push({ nNF, vProd, vNF, chaveNota });
 
                     const row = `<tr>
                                     <td>${nNF}</td>
                                     <td>${vProd.toFixed(2)}</td>
                                     <td>${vNF.toFixed(2)}</td>
+                                    <td>${chaveNota}</td>
                                 </tr>`;
                     tableBody.innerHTML += row;
                 } catch (error) {
@@ -102,11 +106,12 @@
                 .filter(result => result.vProd >= minValue && result.vProd <= maxValue)
                 .sort((a, b) => a.vProd - b.vProd);
 
-            filteredResults.forEach(({ nNF, vProd, vNF }) => {
+            filteredResults.forEach(({ nNF, vProd, vNF, chaveNota }) => {
                 const row = `<tr>
                                 <td>${nNF}</td>
                                 <td>${vProd.toFixed(2)}</td>
                                 <td>${vNF.toFixed(2)}</td>
+                                <td>${chaveNota}</td>
                             </tr>`;
                 tableBody.innerHTML += row;
             });
