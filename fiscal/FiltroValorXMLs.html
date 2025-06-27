@@ -63,6 +63,8 @@
             <input type="number" id="minValue" step="0.01">
             <label for="maxValue">Valor Máximo:</label>
             <input type="number" id="maxValue" step="0.01">
+            <label for="filterNome">Filtrar por Nome do Emitente:</label>
+            <input type="text" id="filterNome">
             <button onclick="filterResults()">Filtrar</button>
         </div>
 
@@ -78,6 +80,7 @@
                     <th>Valor dos Produtos</th>
                     <th>Total da Nota</th>
                     <th>Chave da Nota</th>
+                    <th>Nome do Emitente</th>
                 </tr>
             </thead>
             <tbody>
@@ -121,14 +124,16 @@
                     const vNF = parseFloat(xmlDoc.querySelector('vNF')?.textContent || '0');
                     const infNFeId = xmlDoc.querySelector('infNFe')?.getAttribute('Id') || '';
                     const chaveNota = infNFeId.startsWith('NFe') ? infNFeId.slice(3) : 'N/A';
+                    const xNome = xmlDoc.querySelector('emit > xNome')?.textContent || 'N/A';
 
-                    results.push({ nNF, vProd, vNF, chaveNota });
+                    results.push({ nNF, vProd, vNF, chaveNota, xNome });
 
                     const row = `<tr>
                                     <td>${nNF}</td>
                                     <td>${vProd.toFixed(2)}</td>
                                     <td>${vNF.toFixed(2)}</td>
                                     <td>${chaveNota}</td>
+                                    <td>${xNome}</td>
                                 </tr>`;
                     rows.push(row); // Add to rows array
 
@@ -147,22 +152,27 @@
         function filterResults() {
             const minValue = parseFloat(document.getElementById('minValue').value) || 0;
             const maxValue = parseFloat(document.getElementById('maxValue').value) || Infinity;
+            const filterNome = document.getElementById('filterNome').value.toLowerCase();
             const tableBody = document.querySelector('#resultsTable tbody');
             tableBody.innerHTML = '';
             rowCount = 0;
             updateCounter();
 
             const filteredResults = results
-                .filter(result => result.vProd >= minValue && result.vProd <= maxValue)
+                .filter(result => 
+                    result.vProd >= minValue && 
+                    result.vProd <= maxValue &&
+                    result.xNome.toLowerCase().includes(filterNome))
                 .sort((a, b) => a.vProd - b.vProd);
 
-            const rows = filteredResults.map(({ nNF, vProd, vNF, chaveNota }) => {
+            const rows = filteredResults.map(({ nNF, vProd, vNF, chaveNota, xNome }) => {
                 rowCount++;
                 return `<tr>
                             <td>${nNF}</td>
                             <td>${vProd.toFixed(2)}</td>
                             <td>${vNF.toFixed(2)}</td>
                             <td>${chaveNota}</td>
+                            <td>${xNome}</td>
                         </tr>`;
             });
 
