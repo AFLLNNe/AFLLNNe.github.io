@@ -27,6 +27,24 @@
         th {
             background-color: #f4f4f4;
         }
+        .counter {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            height: 20px;
+            position: relative;
+        }
+        .progress-bar-inner {
+            background-color: #4caf50;
+            height: 100%;
+            width: 0;
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -35,6 +53,10 @@
         <input class="file-input" type="file" id="xmlFiles" multiple accept=".xml">
         <button onclick="processFiles()">Processar Arquivos</button>
 
+        <div class="progress-bar">
+            <div id="progressBarInner" class="progress-bar-inner"></div>
+        </div>
+
         <h2>Filtrar Resultados:</h2>
         <div class="filter-input">
             <label for="minValue">Valor Mínimo:</label>
@@ -42,6 +64,10 @@
             <label for="maxValue">Valor Máximo:</label>
             <input type="number" id="maxValue" step="0.01">
             <button onclick="filterResults()">Filtrar</button>
+        </div>
+
+        <div class="counter">
+            Linhas carregadas: <span id="rowCounter">0</span>
         </div>
 
         <h2>Resultados:</h2>
@@ -62,14 +88,29 @@
 
     <script>
         let results = [];
+        let rowCount = 0;
+
+        function updateCounter() {
+            document.getElementById('rowCounter').textContent = rowCount;
+        }
+
+        function updateProgressBar(percentage) {
+            document.getElementById('progressBarInner').style.width = `${percentage}%`;
+        }
 
         async function processFiles() {
             const files = document.getElementById('xmlFiles').files;
             const tableBody = document.querySelector('#resultsTable tbody');
             tableBody.innerHTML = '';
             results = [];
+            rowCount = 0;
+            updateCounter();
 
-            for (const file of files) {
+            const rows = []; // Accumulate rows here
+            const totalFiles = files.length;
+
+            for (let i = 0; i < totalFiles; i++) {
+                const file = files[i];
                 try {
                     const text = await file.text();
                     const parser = new DOMParser();
@@ -89,11 +130,18 @@
                                     <td>${vNF.toFixed(2)}</td>
                                     <td>${chaveNota}</td>
                                 </tr>`;
-                    tableBody.innerHTML += row;
+                    rows.push(row); // Add to rows array
+
+                    rowCount++;
                 } catch (error) {
                     console.error('Erro ao processar o arquivo:', file.name, error);
                 }
+                updateProgressBar(((i + 1) / totalFiles) * 100);
             }
+
+            tableBody.innerHTML = rows.join(''); // Update the DOM once
+            updateCounter();
+            updateProgressBar(100);
         }
 
         function filterResults() {
@@ -101,20 +149,25 @@
             const maxValue = parseFloat(document.getElementById('maxValue').value) || Infinity;
             const tableBody = document.querySelector('#resultsTable tbody');
             tableBody.innerHTML = '';
+            rowCount = 0;
+            updateCounter();
 
             const filteredResults = results
                 .filter(result => result.vProd >= minValue && result.vProd <= maxValue)
                 .sort((a, b) => a.vProd - b.vProd);
 
-            filteredResults.forEach(({ nNF, vProd, vNF, chaveNota }) => {
-                const row = `<tr>
-                                <td>${nNF}</td>
-                                <td>${vProd.toFixed(2)}</td>
-                                <td>${vNF.toFixed(2)}</td>
-                                <td>${chaveNota}</td>
-                            </tr>`;
-                tableBody.innerHTML += row;
+            const rows = filteredResults.map(({ nNF, vProd, vNF, chaveNota }) => {
+                rowCount++;
+                return `<tr>
+                            <td>${nNF}</td>
+                            <td>${vProd.toFixed(2)}</td>
+                            <td>${vNF.toFixed(2)}</td>
+                            <td>${chaveNota}</td>
+                        </tr>`;
             });
+
+            tableBody.innerHTML = rows.join(''); // Update the DOM once
+            updateCounter();
         }
     </script>
 </body>
