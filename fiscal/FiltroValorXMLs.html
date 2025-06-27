@@ -13,7 +13,7 @@
             max-width: 800px;
             margin: 0 auto;
         }
-        .file-input {
+        .file-input, .filter-input {
             margin: 20px 0;
         }
         table {
@@ -34,6 +34,16 @@
         <h1>Upload XML de Notas Fiscais</h1>
         <input class="file-input" type="file" id="xmlFiles" multiple accept=".xml">
         <button onclick="processFiles()">Processar Arquivos</button>
+
+        <h2>Filtrar Resultados:</h2>
+        <div class="filter-input">
+            <label for="minValue">Valor Mínimo:</label>
+            <input type="number" id="minValue" step="0.01">
+            <label for="maxValue">Valor Máximo:</label>
+            <input type="number" id="maxValue" step="0.01">
+            <button onclick="filterResults()">Filtrar</button>
+        </div>
+
         <h2>Resultados:</h2>
         <table id="resultsTable">
             <thead>
@@ -50,10 +60,13 @@
     </div>
 
     <script>
+        let results = [];
+
         async function processFiles() {
             const files = document.getElementById('xmlFiles').files;
             const tableBody = document.querySelector('#resultsTable tbody');
             tableBody.innerHTML = '';
+            results = [];
 
             for (const file of files) {
                 try {
@@ -62,19 +75,41 @@
                     const xmlDoc = parser.parseFromString(text, 'application/xml');
 
                     const nNF = xmlDoc.querySelector('nNF')?.textContent || 'N/A';
-                    const vProd = xmlDoc.querySelector('total > ICMSTot > vProd')?.textContent || 'N/A';
-                    const vNF = xmlDoc.querySelector('vNF')?.textContent || 'N/A';
+                    const vProd = parseFloat(xmlDoc.querySelector('total > ICMSTot > vProd')?.textContent || '0');
+                    const vNF = parseFloat(xmlDoc.querySelector('vNF')?.textContent || '0');
+
+                    results.push({ nNF, vProd, vNF });
 
                     const row = `<tr>
                                     <td>${nNF}</td>
-                                    <td>${vProd}</td>
-                                    <td>${vNF}</td>
+                                    <td>${vProd.toFixed(2)}</td>
+                                    <td>${vNF.toFixed(2)}</td>
                                 </tr>`;
                     tableBody.innerHTML += row;
                 } catch (error) {
                     console.error('Erro ao processar o arquivo:', file.name, error);
                 }
             }
+        }
+
+        function filterResults() {
+            const minValue = parseFloat(document.getElementById('minValue').value) || 0;
+            const maxValue = parseFloat(document.getElementById('maxValue').value) || Infinity;
+            const tableBody = document.querySelector('#resultsTable tbody');
+            tableBody.innerHTML = '';
+
+            const filteredResults = results
+                .filter(result => result.vProd >= minValue && result.vProd <= maxValue)
+                .sort((a, b) => a.vProd - b.vProd);
+
+            filteredResults.forEach(({ nNF, vProd, vNF }) => {
+                const row = `<tr>
+                                <td>${nNF}</td>
+                                <td>${vProd.toFixed(2)}</td>
+                                <td>${vNF.toFixed(2)}</td>
+                            </tr>`;
+                tableBody.innerHTML += row;
+            });
         }
     </script>
 </body>
