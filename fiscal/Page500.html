@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modify URL</title>
+    <style>
+        #baixarExtensaoBtn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        #baixarExtensaoBtn:hover {
+            background-color: #0056b3;
+        }
+    </style>
     <script>
         function modifyUrl() {
             const inputUrl = document.getElementById('urlInput').value;
@@ -27,14 +46,20 @@
                 alert('Nada para copiar!');
             }
         }
+
         function limparCampos() {
-              document.querySelectorAll('input').forEach(input => input.value = '');
-              document.querySelectorAll('span[id^="resultado"]').forEach(span => span.innerText = '');
-              document.getElementById('numeroSemPontos').innerText = '';
+            document.querySelectorAll('input').forEach(input => input.value = '');
+            document.querySelectorAll('span[id^="resultado"]').forEach(span => span.innerText = '');
+            document.getElementById('numeroSemPontos').innerText = '';
         }
     </script>
 </head>
 <body>
+    <!-- Botão de download da extensão -->
+    <a id="baixarExtensaoBtn" href="https://afllnne.github.io/blob/main/fiscal/extensions/modify_pages_extension.crx" download>
+        Baixar Extensão
+    </a>
+
     <h1>Modificar Parâmetro de URL</h1>
     <label for="urlInput">Insira a URL:</label>
     <input type="text" id="urlInput" style="width: 100%;" placeholder="Cole a URL aqui">
@@ -43,8 +68,8 @@
     <h2>URL Modificada:</h2>
     <p id="output" style="word-wrap: break-word; border: 1px solid #ddd; padding: 10px; background-color: #f9f9f9;"></p>
     <button onclick="copyToClipboard()">Copiar URL</button>
+
     <script>
-        // Test script load
         console.log('Script carregado com sucesso!');
     </script>
 </body>
