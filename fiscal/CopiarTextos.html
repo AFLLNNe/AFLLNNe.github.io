@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Copiar Textos Fixos e Campos Dinâmicos</title>
+    <title>Copiar Textos Editáveis</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,44 +12,39 @@
         .linha {
             margin-bottom: 10px;
         }
+        .linha input {
+            width: 500px;
+            padding: 5px;
+        }
         .linha button {
             margin-left: 10px;
+            padding: 5px 10px;
         }
         .campo-dinamico {
             margin-top: 20px;
         }
     </style>
     <script>
-        // Função para copiar texto com fallback compatível com mais navegadores
-        function copiarTexto(texto) {
-            const tempInput = document.createElement("input");
-            tempInput.style.position = "absolute";
-            tempInput.style.left = "-9999px";
-            tempInput.value = texto;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            try {
-                document.execCommand("copy");
-                //alert(`Copiado: ${texto}`);
-            } catch (err) {
-                alert("Erro ao copiar.");
-            }
-            document.body.removeChild(tempInput);
+        function copiarTextoDoCampo(inputElement) {
+            inputElement.select();
+            inputElement.setSelectionRange(0, 99999); // Para dispositivos móveis
+            document.execCommand("copy");
         }
 
-        // Adiciona novo campo de texto com botão de cópia
         function adicionarCampo() {
             const container = document.getElementById("camposDinamicos");
+
             const div = document.createElement("div");
             div.className = "linha";
 
             const input = document.createElement("input");
             input.type = "text";
+            input.placeholder = "Digite algo...";
             input.size = 60;
 
             const btn = document.createElement("button");
             btn.textContent = "Copiar";
-            btn.onclick = () => copiarTexto(input.value);
+            btn.onclick = () => copiarTextoDoCampo(input);
 
             div.appendChild(input);
             div.appendChild(btn);
@@ -58,31 +53,31 @@
     </script>
 </head>
 <body>
-    <h2>Copiar Textos Fixos</h2>
+    <h2>Copiar Textos Editáveis</h2>
 
     <div class="linha">
-        .-.XX.XX.2025-XX.XX.2025.-.NFE ENTRADA- X NOTAS
-        <button onclick="copiarTexto('.-.XX.XX.2025-XX.XX.2025.-.NFE ENTRADA- X NOTAS')">Copiar</button>
+        <input type="text" value=".-.XX.XX.2025-XX.XX.2025.-.NFE ENTRADA- X NOTAS">
+        <button onclick="copiarTextoDoCampo(this.previousElementSibling)">Copiar</button>
     </div>
     <div class="linha">
-        .-.XX.XX.2025-XX.XX.2025.-.NFE SAIDA - X NOTAS
-        <button onclick="copiarTexto('.-.XX.XX.2025-XX.XX.2025.-.NFE SAIDA - X NOTAS')">Copiar</button>
+        <input type="text" value=".-.XX.XX.2025-XX.XX.2025.-.NFE SAIDA - X NOTAS">
+        <button onclick="copiarTextoDoCampo(this.previousElementSibling)">Copiar</button>
     </div>
     <div class="linha">
-        .-.XX.XX.2025-XX.XX.2025.-.NFCE SAIDA - X NOTAS
-        <button onclick="copiarTexto('.-.XX.XX.2025-XX.XX.2025.-.NFCE SAIDA - X NOTAS')">Copiar</button>
+        <input type="text" value=".-.XX.XX.2025-XX.XX.2025.-.NFCE SAIDA - X NOTAS">
+        <button onclick="copiarTextoDoCampo(this.previousElementSibling)">Copiar</button>
     </div>
     <div class="linha">
-        DAS XX-2025
-        <button onclick="copiarTexto('DAS XX-2025')">Copiar</button>
+        <input type="text" value="DAS XX-2025">
+        <button onclick="copiarTextoDoCampo(this.previousElementSibling)">Copiar</button>
     </div>
     <div class="linha">
-        DAE FRONTEIRA XX-2025
-        <button onclick="copiarTexto('DAE FRONTEIRA XX-2025')">Copiar</button>
+        <input type="text" value="DAE FRONTEIRA XX-2025">
+        <button onclick="copiarTextoDoCampo(this.previousElementSibling)">Copiar</button>
     </div>
     <div class="linha">
-        SIMPLES NACIONAL COMP XX/2025
-        <button onclick="copiarTexto('SIMPLES NACIONAL COMP XX/2025')">Copiar</button>
+        <input type="text" value="SIMPLES NACIONAL COMP XX/2025">
+        <button onclick="copiarTextoDoCampo(this.previousElementSibling)">Copiar</button>
     </div>
 
     <hr>
