@@ -1,309 +1,238 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8"><!-- Define a codificação UTF-8 para suportar caracteres especiais -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"><!-- Configura a responsividade para dispositivos móveis -->
-    <title>Upload XML de Notas Fiscais</title>
-    <style>
-        /* Estilização geral do corpo e layout da página */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        /* Container centralizado com largura máxima */
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        /* Margem para inputs e filtros */
-        .file-input, .filter-input {
-            margin: 20px 0;
-        }
-        /* Layout flexível para filtros */
-        .filter-input {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        /* Label e input na mesma linha */
-        .filter-input label {
-            display: flex;
-            align-items: center;
-            white-space: nowrap; /* evita quebra do texto da label */
-        }
-        /* Espaçamento entre label e input */
-        .filter-input input {
-            margin-left: 5px;
-        }
-        /* Estilo da tabela */
-        table {
-            width: 100%;
-            border-collapse: collapse; /* Remove espaços entre células */
-        }
-        /* Bordas e espaçamento das células */
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-        /* Cor de fundo do cabeçalho */
-        th {
-            background-color: #f4f4f4;
-        }
-        /* Contadores de linhas e soma */
-        .counter {
-            font-size: 18px;
-            margin: 10px 0;
-        }
-        /* Estilo da barra de progresso */
-        .progress-bar {
-            width: 100%;
-            background-color: #f4f4f4;
-            border: 1px solid #ddd;
-            margin: 20px 0;
-            height: 20px;
-            position: relative; /* necessário para posicionar texto central */
-        }
-        /* Parte preenchida da barra */
-        .progress-bar-inner {
-            background-color: #4caf50;
-            height: 100%;
-            width: 0;
-            transition: width 0.3s ease;
-        }
-        /* Texto centralizado dentro da barra de progresso */
-        .progress-text {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            line-height: 20px; /* centraliza verticalmente */
-            font-size: 14px;
-            color: #000;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload XML de Notas Fiscais</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .file-input, .filter-input {
+      margin: 20px 0;
+    }
+    .filter-input {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .filter-input label {
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+    .filter-input input {
+      margin-left: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .counter {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    .progress-bar {
+      width: 100%;
+      background-color: #f4f4f4;
+      border: 1px solid #ddd;
+      margin: 20px 0;
+      height: 20px;
+      position: relative;
+    }
+    .progress-bar-inner {
+      background-color: #4caf50;
+      height: 100%;
+      width: 0;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      line-height: 20px;
+      font-size: 14px;
+      color: #000;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Título da página -->
-        <h1>Upload XML de Notas Fiscais</h1>
-        
-        <!-- Input para seleção múltipla de arquivos XML -->
-        <input class="file-input" type="file" id="xmlFiles" multiple accept=".xml">
-        
-        <!-- Botão para iniciar o processamento dos arquivos -->
-        <button onclick="processFiles()">Processar Arquivos</button>
+  <div class="container">
+    <h1>Upload XML de Notas Fiscais</h1>
 
-        <!-- Barra de progresso para mostrar status do processamento -->
-        <div class="progress-bar">
-            <div id="progressBarInner" class="progress-bar-inner"></div>
-            <div id="progressText" class="progress-text">0%</div> <!-- Texto percentual dentro da barra -->
-        </div>
+    <input class="file-input" type="file" id="xmlFiles" multiple accept=".xml">
+    <button onclick="processFiles()">Processar Arquivos</button>
 
-        <!-- Área de filtros para refinar resultados -->
-        <h2>Filtrar Resultados:</h2>
-        <div class="filter-input">
-            <!-- Filtros de valores mínimos e máximos -->
-            <label for="minValue">Valor Mínimo:<input type="number" id="minValue" step="0.01"></label>
-            <label for="maxValue">Valor Máximo:<input type="number" id="maxValue" step="0.01"></label>
-            
-            <!-- Filtro por nome do emitente -->
-            <label for="filterNome">Filtrar por Nome:<input type="text" id="filterNome"></label>
-            
-            <!-- Filtro por CNPJ do emitente -->
-            <label for="filterCNPJ">Filtrar por CNPJ:<input type="text" id="filterCNPJ"></label>
-
-            <!-- Filtro por nome do destinatario -->
-            <label for="filterNomeDest">Filtrar por NomeDest:<input type="text" id="filterNomeDest"></label>
-
-            <!-- Filtro por CNPJ do destinatario -->
-            <label for="filterCNPJDest">Filtrar por CNPJDest:<input type="text" id="filterCNPJDest"></label>
-
-            
-            
-            <!-- Botão para aplicar os filtros -->
-            <button onclick="filterResults()">Filtrar</button>
-        </div>
-
-        <!-- Contador de linhas carregadas -->
-        <div class="counter">
-            Linhas carregadas: <span id="rowCounter">0</span>
-        </div>
-        
-        <!-- Soma total dos valores das notas exibidas -->
-        <div class="counter">
-            Soma Total das Notas: R$ <span id="sumTotalNotas">0.00</span>
-        </div>
-
-        <!-- Tabela que exibe os resultados -->
-        <h2>Resultados:</h2>
-        <table id="resultsTable">
-            <thead>
-                <tr>
-                    <th>Número da Nota</th>
-                    <th>Valor dos Produtos</th>
-                    <th>Total da Nota</th>
-                    <th>Chave da Nota</th>
-                    <th>Nome do Emitente</th>
-                    <th>CNPJ do Emitente</th>
-                    <th>Nome do Destinatario</th>
-                    <th>CNPJ do Destinatario</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Linhas com resultados serão inseridas aqui -->
-            </tbody>
-        </table>
+    <div class="progress-bar">
+      <div id="progressBarInner" class="progress-bar-inner"></div>
+      <div id="progressText" class="progress-text">0%</div>
     </div>
 
-    <script>
-        // Array que armazenará os dados extraídos dos XMLs
-        let results = [];
-        // Contador de linhas exibidas
-        let rowCount = 0;
+    <h2>Filtrar Resultados:</h2>
+    <div class="filter-input">
+      <label for="minValue">Valor Mínimo:<input type="number" id="minValue" step="0.01"></label>
+      <label for="maxValue">Valor Máximo:<input type="number" id="maxValue" step="0.01"></label>
+      <label for="filterNome">Filtrar por Nome:<input type="text" id="filterNome"></label>
+      <label for="filterCNPJ">Filtrar por CNPJ:<input type="text" id="filterCNPJ"></label>
+      <label for="filterNomeDest">Filtrar por NomeDest:<input type="text" id="filterNomeDest"></label>
+      <label for="filterCNPJDest">Filtrar por CNPJDest:<input type="text" id="filterCNPJDest"></label>
+      <button onclick="filterResults()">Filtrar</button>
+    </div>
 
-        // Atualiza o contador visível de linhas na página
-        function updateCounter() {
-            document.getElementById('rowCounter').textContent = rowCount;
+    <div class="counter">
+      Linhas carregadas: <span id="rowCounter">0</span>
+    </div>
+    <div class="counter">
+      Soma Total das Notas: R$ <span id="sumTotalNotas">0.00</span>
+    </div>
+
+    <h2>Resultados:</h2>
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>Número da Nota</th>
+          <th>Valor dos Produtos</th>
+          <th>Total da Nota</th>
+          <th>Chave da Nota</th>
+          <th>Nome do Emitente</th>
+          <th>CNPJ do Emitente</th>
+          <th>Nome do Destinatário</th>
+          <th>CNPJ do Destinatário</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Linhas serão inseridas aqui -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    let results = [];
+    let rowCount = 0;
+
+    function updateCounter() {
+      document.getElementById('rowCounter').textContent = rowCount;
+    }
+
+    function updateSumTotalNotas() {
+      const sum = results.reduce((acc, result) => acc + result.vNF, 0);
+      document.getElementById('sumTotalNotas').textContent = sum.toFixed(2);
+    }
+
+    function updateProgressBar(percentage) {
+      document.getElementById('progressBarInner').style.width = `${percentage}%`;
+      document.getElementById('progressText').textContent = `${Math.round(percentage)}%`;
+    }
+
+    async function processFiles() {
+      const files = document.getElementById('xmlFiles').files;
+      const tableBody = document.querySelector('#resultsTable tbody');
+      tableBody.innerHTML = '';
+      results = [];
+      rowCount = 0;
+      updateCounter();
+
+      const rows = [];
+      const totalFiles = files.length;
+
+      for (let i = 0; i < totalFiles; i++) {
+        const file = files[i];
+        try {
+          const text = await file.text();
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(text, 'application/xml');
+
+          const nNF = xmlDoc.querySelector('nNF')?.textContent || 'N/A';
+          const vProd = parseFloat(xmlDoc.querySelector('total > ICMSTot > vProd')?.textContent || '0');
+          const vNF = parseFloat(xmlDoc.querySelector('vNF')?.textContent || '0');
+          const infNFeId = xmlDoc.querySelector('infNFe')?.getAttribute('Id') || '';
+          const chaveNota = infNFeId.startsWith('NFe') ? infNFeId.slice(3) : 'N/A';
+          const xNome = xmlDoc.querySelector('emit > xNome')?.textContent || 'N/A';
+          const cnpj = xmlDoc.querySelector('emit > CNPJ')?.textContent || 'N/A';
+          const xNomeDest = xmlDoc.querySelector('dest > xNome')?.textContent || 'N/A';
+          const cnpjDest = xmlDoc.querySelector('dest > CNPJ')?.textContent || 'N/A';
+
+          results.push({ nNF, vProd, vNF, chaveNota, xNome, cnpj, xNomeDest, cnpjDest });
+
+          const row = `<tr>
+                          <td>${nNF}</td>
+                          <td>${vProd.toFixed(2)}</td>
+                          <td>${vNF.toFixed(2)}</td>
+                          <td>${chaveNota}</td>
+                          <td>${xNome}</td>
+                          <td>${cnpj}</td>
+                          <td>${xNomeDest}</td>
+                          <td>${cnpjDest}</td>
+                      </tr>`;
+          rows.push(row);
+          rowCount++;
+        } catch (error) {
+          console.error('Erro ao processar o arquivo:', file.name, error);
         }
+        updateProgressBar(((i + 1) / totalFiles) * 100);
+      }
 
-        // Calcula e atualiza a soma total dos valores 'vNF' exibidos
-        function updateSumTotalNotas() {
-            const sum = results.reduce((acc, result) => acc + result.vNF, 0);
-            document.getElementById('sumTotalNotas').textContent = sum.toFixed(2);
-        }
+      tableBody.innerHTML = rows.join('');
+      updateCounter();
+      updateSumTotalNotas();
+      updateProgressBar(100);
+    }
 
-        // Atualiza a barra de progresso e o texto percentual
-        function updateProgressBar(percentage) {
-            document.getElementById('progressBarInner').style.width = `${percentage}%`;
-            document.getElementById('progressText').textContent = `${Math.round(percentage)}%`;
-        }
+    function filterResults() {
+      const minValue = parseFloat(document.getElementById('minValue').value) || 0;
+      const maxValue = parseFloat(document.getElementById('maxValue').value) || Infinity;
+      const filterNome = document.getElementById('filterNome').value.toLowerCase();
+      const filterCNPJ = document.getElementById('filterCNPJ').value;
+      const filterNomeDest = document.getElementById('filterNomeDest').value.toLowerCase();
+      const filterCNPJDest = document.getElementById('filterCNPJDest').value;
 
-        // Função principal que processa os arquivos XML selecionados
-        async function processFiles() {
-            // Pega os arquivos selecionados
-            const files = document.getElementById('xmlFiles').files;
-            // Referência ao corpo da tabela para inserir linhas
-            const tableBody = document.querySelector('#resultsTable tbody');
-            // Limpa resultados anteriores
-            tableBody.innerHTML = '';
-            results = [];
-            rowCount = 0;
-            updateCounter();
+      const tableBody = document.querySelector('#resultsTable tbody');
+      tableBody.innerHTML = '';
+      rowCount = 0;
+      updateCounter();
 
-            // Array temporário para armazenar as linhas da tabela
-            const rows = [];
-            const totalFiles = files.length;
+      const filteredResults = results
+        .filter(result =>
+          result.vProd >= minValue &&
+          result.vProd <= maxValue &&
+          result.xNome.toLowerCase().includes(filterNome) &&
+          result.cnpj.includes(filterCNPJ) &&
+          result.xNomeDest.toLowerCase().includes(filterNomeDest) &&
+          result.cnpjDest.includes(filterCNPJDest)
+        )
+        .sort((a, b) => a.vProd - b.vProd);
 
-            // Loop para processar cada arquivo
-            for (let i = 0; i < totalFiles; i++) {
-                const file = files[i];
-                try {
-                    // Lê o conteúdo do arquivo como texto
-                    const text = await file.text();
-                    // Cria um parser XML para interpretar o texto
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(text, 'application/xml');
+      const rows = filteredResults.map(({ nNF, vProd, vNF, chaveNota, xNome, cnpj, xNomeDest, cnpjDest }) => {
+        rowCount++;
+        return `<tr>
+                    <td>${nNF}</td>
+                    <td>${vProd.toFixed(2)}</td>
+                    <td>${vNF.toFixed(2)}</td>
+                    <td>${chaveNota}</td>
+                    <td>${xNome}</td>
+                    <td>${cnpj}</td>
+                    <td>${xNomeDest}</td>
+                    <td>${cnpjDest}</td>
+                </tr>`;
+      });
 
-                    // Extrai o número da nota fiscal (<nNF>)
-                    const nNF = xmlDoc.querySelector('nNF')?.textContent || 'N/A';
-                    // Extrai o valor dos produtos (<vProd>)
-                    const vProd = parseFloat(xmlDoc.querySelector('total > ICMSTot > vProd')?.textContent || '0');
-                    // Extrai o valor total da nota (<vNF>)
-                    const vNF = parseFloat(xmlDoc.querySelector('vNF')?.textContent || '0');
-                    // Extrai o atributo Id da tag <infNFe> e formata a chave da nota (remove "NFe")
-                    const infNFeId = xmlDoc.querySelector('infNFe')?.getAttribute('Id') || '';
-                    const chaveNota = infNFeId.startsWith('NFe') ? infNFeId.slice(3) : 'N/A';
-                    // Extrai o nome do emitente (<xNome>)
-                    const xNome = xmlDoc.querySelector('emit > xNome')?.textContent || 'N/A';
-                    // Extrai o CNPJ do emitente (<CNPJ>)
-                    const cnpj = xmlDoc.querySelector('emit > CNPJ')?.textContent || 'N/A';
-                    
-                    // Extrai o CNPJ do destinatario (<CNPJ>)
-                    const cnpjDest = xmlDoc.querySelector('dest > CNPJ')?.textContent || 'N/A';
-                    // Extrai o nome do destinatario (<xNome>)
-                    const xNomeDest = xmlDoc.querySelector('dest > xNome')?.textContent || 'N/A';
-
-                    // Adiciona os dados extraídos ao array results
-                    results.push({ nNF, vProd, vNF, chaveNota, xNome, cnpj, xNomeDest, cnpjDest });
-
-                    // Cria uma linha da tabela com os dados extraídos
-                    const row = `<tr>
-                                    <td>${nNF}</td>
-                                    <td>${vProd.toFixed(2)}</td>
-                                    <td>${vNF.toFixed(2)}</td>
-                                    <td>${chaveNota}</td>
-                                    <td>${xNome}</td>
-                                    <td>${cnpj}</td>
-                                    <td>${xNomeDest}</td>
-                                    <td>${cnpjDest}</td>
-                                </tr>`;
-                    // Adiciona a linha ao array temporário
-                    rows.push(row);
-
-                    // Incrementa o contador de linhas
-                    rowCount++;
-                } catch (error) {
-                    // Se ocorrer erro na leitura ou parse do arquivo, mostra no console
-                    console.error('Erro ao processar o arquivo:', file.name, error);
-                }
-                // Atualiza a barra de progresso conforme os arquivos são processados
-                updateProgressBar(((i + 1) / totalFiles) * 100);
-            }
-
-            // Insere todas as linhas na tabela de uma vez (melhor performance)
-            tableBody.innerHTML = rows.join('');
-            // Atualiza o contador e soma total na interface
-            updateCounter();
-            updateSumTotalNotas();
-            // Garante que a barra de progresso esteja cheia ao final
-            updateProgressBar(100);
-        }
-
-        // Função para filtrar os resultados com base nos critérios do usuário
-        function filterResults() {
-            // Obtém valores digitados nos filtros (com tratamento para valores vazios)
-            const minValue = parseFloat(document.getElementById('minValue').value) || 0;
-            const maxValue = parseFloat(document.getElementById('maxValue').value) || Infinity;
-            const filterNome = document.getElementById('filterNome').value.toLowerCase();
-            const filterCNPJ = document.getElementById('filterCNPJ').value;
-            const filterCNPJ = document.getElementById('filterNomeDest').value;
-            const filterCNPJ = document.getElementById('filterCNPJDest').value;
-
-            const tableBody = document.querySelector('#resultsTable tbody');
-            tableBody.innerHTML = ''; // limpa tabela
-            rowCount = 0;
-            updateCounter();
-
-            // Filtra o array results com base nos critérios informados
-            const filteredResults = results
-                .filter(result => 
-                    result.vProd >= minValue && 
-                    result.vProd <= maxValue &&
-                    result.xNome.toLowerCase().includes(filterNome) &&
-                    result.cnpj.includes(filterCNPJ))
-                // Ordena do menor para o maior valor dos produtos
-                .sort((a, b) => a.vProd - b.vProd);
-
-            // Cria as linhas para os resultados filtrados
-            const rows = filteredResults.map(({ nNF, vProd, vNF, chaveNota, xNome, cnpj, xNomeDest, cnpjDest }) => {
-                rowCount++;
-                return `<tr>
-                            <td>${nNF}</td>
-                            <td>${vProd.toFixed(2)}</td>
-                            <td>${vNF.toFixed(2)}</td>
-                            <td>${chaveNota}</td>
-                            <td>${xNome}</td>
-                            <td>${cnpj}</td>
-                            <td>${xNomeDest}</td>
-                            <td>${cnpjDest}</td>
-                        </tr>`;
-            });
-
-            // Insere as linhas na tabela
-            tableBody.innerHTML = rows.join('');
-            updateCounter();
-            updateSumTotalNotas();
-        }
-    </script>
+      tableBody.innerHTML = rows.join('');
+      updateCounter();
+      updateSumTotalNotas();
+    }
+  </script>
 </body>
 </html>
