@@ -224,7 +224,7 @@
                     const xNomeDest = xmlDoc.querySelector('dest > xNome')?.textContent || 'N/A';
 
                     // Adiciona os dados extraídos ao array results
-                    results.push({ nNF, vProd, vNF, chaveNota, xNome, cnpj, cnpjDest, xNomeDest });
+                    results.push({ nNF, vProd, vNF, chaveNota, xNome, cnpj, xNomeDest, cnpjDest });
 
                     // Cria uma linha da tabela com os dados extraídos
                     const row = `<tr>
