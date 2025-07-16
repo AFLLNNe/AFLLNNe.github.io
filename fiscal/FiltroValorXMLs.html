@@ -111,6 +111,14 @@
             
             <!-- Filtro por CNPJ do emitente -->
             <label for="filterCNPJ">Filtrar por CNPJ:<input type="text" id="filterCNPJ"></label>
+
+            <!-- Filtro por nome do destinatario -->
+            <label for="filterCNPJ">Filtrar por NomeDest:<input type="text" id="filterNomeDest"></label>
+
+            <!-- Filtro por CNPJ do destinatario -->
+            <label for="filterCNPJ">Filtrar por CNPJDest:<input type="text" id="filterCNPJDest"></label>
+
+            
             
             <!-- Botão para aplicar os filtros -->
             <button onclick="filterResults()">Filtrar</button>
@@ -137,6 +145,8 @@
                     <th>Chave da Nota</th>
                     <th>Nome do Emitente</th>
                     <th>CNPJ do Emitente</th>
+                    <th>Nome do Destinatario</th>
+                    <th>CNPJ do Destinatario</th>
                 </tr>
             </thead>
             <tbody>
@@ -207,9 +217,14 @@
                     const xNome = xmlDoc.querySelector('emit > xNome')?.textContent || 'N/A';
                     // Extrai o CNPJ do emitente (<CNPJ>)
                     const cnpj = xmlDoc.querySelector('emit > CNPJ')?.textContent || 'N/A';
+                    
+                    // Extrai o CNPJ do destinatario (<CNPJ>)
+                    const cnpjDest = xmlDoc.querySelector('dest > CNPJ')?.textContent || 'N/A';
+                    // Extrai o nome do destinatario (<xNome>)
+                    const xNomeDest = xmlDoc.querySelector('dest > xNome')?.textContent || 'N/A';
 
                     // Adiciona os dados extraídos ao array results
-                    results.push({ nNF, vProd, vNF, chaveNota, xNome, cnpj });
+                    results.push({ nNF, vProd, vNF, chaveNota, xNome, cnpj, cnpjDest, xNomeDest });
 
                     // Cria uma linha da tabela com os dados extraídos
                     const row = `<tr>
@@ -219,6 +234,8 @@
                                     <td>${chaveNota}</td>
                                     <td>${xNome}</td>
                                     <td>${cnpj}</td>
+                                    <td>${xNomeDest}</td>
+                                    <td>${cnpjDest}</td>
                                 </tr>`;
                     // Adiciona a linha ao array temporário
                     rows.push(row);
@@ -249,6 +266,8 @@
             const maxValue = parseFloat(document.getElementById('maxValue').value) || Infinity;
             const filterNome = document.getElementById('filterNome').value.toLowerCase();
             const filterCNPJ = document.getElementById('filterCNPJ').value;
+            const filterCNPJ = document.getElementById('filterNomeDest').value;
+            const filterCNPJ = document.getElementById('filterCNPJDest').value;
 
             const tableBody = document.querySelector('#resultsTable tbody');
             tableBody.innerHTML = ''; // limpa tabela
@@ -266,7 +285,7 @@
                 .sort((a, b) => a.vProd - b.vProd);
 
             // Cria as linhas para os resultados filtrados
-            const rows = filteredResults.map(({ nNF, vProd, vNF, chaveNota, xNome, cnpj }) => {
+            const rows = filteredResults.map(({ nNF, vProd, vNF, chaveNota, xNome, cnpj, xNomeDest, cnpjDest }) => {
                 rowCount++;
                 return `<tr>
                             <td>${nNF}</td>
@@ -275,6 +294,8 @@
                             <td>${chaveNota}</td>
                             <td>${xNome}</td>
                             <td>${cnpj}</td>
+                            <td>${xNomeDest}</td>
+                            <td>${cnpjDest}</td>
                         </tr>`;
             });
 
