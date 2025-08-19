@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Perguntas e Respostas</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #question { font-size: 20px; margin-bottom: 20px; }
+        .option { margin: 10px 0; }
+        #feedback { margin-top: 20px; color: green; }
+        #metrics { margin-top: 20px; }
+        button { padding: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Jogo de Perguntas e Respostas</h1>
+    <p>Responda às perguntas para desafiar seu conhecimento. A dificuldade ajusta com base no seu desempenho. O jogo continua até você fechar a página.</p>
+    <div id="question"></div>
+    <div id="options"></div>
+    <button id="submit" style="display: none;">Enviar Resposta</button>
+    <div id="feedback"></div>
+    <div id="metrics"></div>
+    <button id="next" style="display: none;">Próxima Pergunta</button>
+
+    <script>
+        // Categorias do Open Trivia DB mapeadas para áreas amplas, incluindo +18 se aplicável (API é geral, mas cobre temas adultos em celebridades, filmes, etc.)
+        const categories = [
+            9,  // General Knowledge (Curiosidades, Marcas, etc.)
+            10, // Books (Literatura)
+            11, // Film (Cinema, Filmes de Terror/Comédia)
+            12, // Music (Música, Pop, Clássica)
+            13, // Musicals & Theatres (Artes)
+            14, // Television (Séries de TV)
+            15, // Video Games (Jogos de Vídeo Game)
+            16, // Board Games (Jogos e Brincadeiras)
+            17, // Science & Nature (Ciência, Biologia, Astronomia, Animais, Plantas)
+            18, // Computers (Computação, Tecnologia)
+            19, // Mathematics (Matemática, Lógica)
+            20, // Mythology (Mitologia, Mitos e Lendas, Religião)
+            21, // Sports (Esportes)
+            22, // Geography (Geografia, Países e Capitais)
+            23, // History (História Mundial, Personagens Históricos)
+            24, // Politics (Política e Atualidades)
+            25, // Art (Pintura, Escultura)
+            26, // Celebrities (Celebridades, Moda, +18 possíveis)
+            27, // Animals (Animais)
+            28, // Vehicles (Meios de Transporte)
+            29, // Comics (Super-heróis)
+            30, // Gadgets (Invenções, Tecnologia)
+            31, // Anime & Manga (Animações)
+            32  // Cartoon & Animations (Desenhos)
+        ];
+        const totalCategories = categories.length;
+
+        // Categorias consideradas "atuais" para AC (Política, Celebridades, Filmes, Música, TV, Jogos)
+        const currentCategories = [11, 12, 14, 15, 24, 26];
+
+        // Variáveis do jogo
+        let questionCount = 0;
+        let correctCount = 0;
+        let streak = 0;
+        let currentLevel = 1;
+        let categoriesAnswered = new Set();
+        let depthPoints = 0;
+        let currentTopicsCount = 0;
+        let currentTopicsCorrect = 0;
+        let analyticalCorrect = 0; // Para CA, categorias lógicas: Math, Science, Computers
+        let analyticalCount = 0;
+        const analyticalCategories = [17, 18, 19];
+        let currentQuestion = null;
+        let selectedOption = null;
+
+        // Mapear nível para dificuldade
+        function getDifficulty(level) {
+            if (level <= 2) return 'easy';
+            if (level <= 5) return 'medium';
+            return 'hard';
+        }
+
+        // Pontos de profundidade por dificuldade
+        function getDepthPoints(diff) {
+            if (diff === 'easy') return 1;
+            if (diff === 'medium') return 2;
+            return 3;
+        }
+
+        // Calcular métricas
+        function calculateMetrics() {
+            const ak = (categoriesAnswered.size / totalCategories) * 100;
+            const pk = correctCount > 0 ? depthPoints / correctCount : 0;
+            const ca = analyticalCount > 0 ? (analyticalCorrect / analyticalCount) * 100 : 0;
+            const ac = currentTopicsCount > 0 ? (currentTopicsCorrect / currentTopicsCount) * 100 : 0;
+            const sc = (correctCount / questionCount) * 100; // Síntese como accuracy geral, já que multiple choice
+
+            return { AK: ak.toFixed(2), PK: pk.toFixed(2), CA: ca.toFixed(2), AC: ac.toFixed(2), SC: sc.toFixed(2) };
+        }
+
+        // Mostrar feedback rápido ou completo
+        function showFeedback() {
+            const metrics = calculateMetrics();
+            let feedbackText = `Perguntas respondidas: ${questionCount} | Corretas: ${correctCount} | Nível: ${currentLevel}\n`;
+            feedbackText += `Métricas Rápidas: AK=${metrics.AK}%, PK=${metrics.PK}, CA=${metrics.CA}%, AC=${metrics.AC}%, SC=${metrics.SC}%`;
+
+            if (questionCount % 20 === 0) {
+                feedbackText = `Relatório Detalhado:\n`;
+                feedbackText += `- Amplitude de Conhecimento (AK): ${metrics.AK}% (diversidade de áreas)\n`;
+                feedbackText += `- Profundidade de Conhecimento (PK): ${metrics.PK} (detalhes por tema)\n`;
+                feedbackText += `- Capacidade Analítica (CA): ${metrics.CA}% (lógica e raciocínio)\n`;
+                feedbackText += `- Atualização Cultural (AC): ${metrics.AC}% (eventos contemporâneos)\n`;
+                feedbackText += `- Síntese & Criatividade (SC): ${metrics.SC}% (síntese geral)\n`;
+                feedbackText += `Progresso: Nível ${currentLevel} de 7. Continue para avançar!`;
+            }
+
+            document.getElementById('metrics').innerText = feedbackText;
+        }
+
+        // Buscar pergunta da API
+        async function fetchQuestion() {
+            const cat = categories[Math.floor(Math.random() * categories.length)];
+            const diff = getDifficulty(currentLevel);
+            const url = `https://opentdb.com/api.php?amount=1&category=${cat}&difficulty=${diff}&type=multiple`;
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.results[0];
+        }
+
+        // Embaralhar opções
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Exibir pergunta
+        async function displayQuestion() {
+            currentQuestion = await fetchQuestion();
+            document.getElementById('question').innerHTML = currentQuestion.question;
+            const options = [...currentQuestion.incorrect_answers, currentQuestion.correct_answer];
+            shuffle(options);
+            let optionsHtml = '';
+            options.forEach((opt, index) => {
+                optionsHtml += `<div class="option"><input type="radio" name="answer" id="opt${index}" value="${opt}"><label for="opt${index}">${opt}</label></div>`;
+            });
+            document.getElementById('options').innerHTML = optionsHtml;
+            document.getElementById('submit').style.display = 'block';
+            document.getElementById('next').style.display = 'none';
+            document.getElementById('feedback').innerText = '';
+        }
+
+        // Verificar resposta
+        function checkAnswer() {
+            const selected = document.querySelector('input[name="answer"]:checked');
+            if (!selected) return alert('Selecione uma opção!');
+            selectedOption = selected.value;
+            const isCorrect = selectedOption === currentQuestion.correct_answer;
+            const cat = parseInt(currentQuestion.category.replace(/.*: /, '')) || 9; // Extrair ID se possível, mas API retorna nome, wait.
+
+            // API retorna category como string, e.g. "Science & Nature", so map back to ID? But for tracking, use the name as key.
+
+            // Melhor: usar nome da categoria para set.
+            const catName = currentQuestion.category;
+            if (isCorrect) {
+                correctCount++;
+                streak++;
+                categoriesAnswered.add(catName);
+                depthPoints += getDepthPoints(currentQuestion.difficulty);
+                if (currentCategories.some(id => currentQuestion.category.includes(id.toString()))) { // Rough match
+                    currentTopicsCorrect++;
+                }
+                if (analyticalCategories.some(id => currentQuestion.category.includes(id.toString()))) {
+                    analyticalCorrect++;
+                }
+                document.getElementById('feedback').innerText = 'Correto! ' + currentQuestion.correct_answer;
+                document.getElementById('feedback').style.color = 'green';
+                if (streak >= 3 && currentLevel < 7) {
+                    currentLevel++;
+                    streak = 0;
+                }
+            } else {
+                streak = 0;
+                document.getElementById('feedback').innerText = 'Errado! A resposta correta é: ' + currentQuestion.correct_answer;
+                document.getElementById('feedback').style.color = 'red';
+                if (questionCount % 5 === 0 && currentLevel > 1 && streak === 0) {
+                    currentLevel--;
+                }
+            }
+            questionCount++;
+            if (currentCategories.some(id => currentQuestion.category.includes(id.toString()))) {
+                currentTopicsCount++;
+            }
+            if (analyticalCategories.some(id => currentQuestion.category.includes(id.toString()))) {
+                analyticalCount++;
+            }
+            document.getElementById('submit').style.display = 'none';
+            document.getElementById('next').style.display = 'block';
+
+            if (questionCount % 10 === 0) {
+                showFeedback();
+            }
+        }
+
+        // Iniciar jogo
+        displayQuestion();
+
+        // Eventos
+        document.getElementById('submit').addEventListener('click', checkAnswer);
+        document.getElementById('next').addEventListener('click', displayQuestion);
+    </script>
+</body>
+</html>
