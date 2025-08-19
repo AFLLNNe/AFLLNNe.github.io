@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PDF FLLNNe</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid #ccc;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .tab {
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    background: #eee;
+    margin-right: 5px;
+    user-select: none;
+  }
+  .tab.active {
+    background: white;
+    font-weight: bold;
+    border-top: 3px solid #007BFF;
+  }
+  .tab-content {
+    border: 0px solid #ccc;
+    padding: 0;
+    height: 400px; /* altura fixa para o iframe */
+  }
+  .useful-links-list {
+    list-style-type: none;
+    padding: 0;
+   }
+   .useful-link-item {
+     margin-bottom: 10px;
+   }
+   .useful-link {
+     text-decoration: none;
+     color: #007BFF;
+   }
+    .useful-link:hover {
+      text-decoration: underline;
+   }
+  iframe {
+    width: 100%;
+    height: 125%;
+    border: true;
+    display: none; /* inicialmente escondido */
+  }
+  iframe.active {
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<!--<h2>Abas com iframes (mantém estado ao trocar aba)</h2>-->
+
+<div class="tabs">
+  <div class="tab active" data-target="iframe1">Master</div>
+ <!-- <div class="tab" data-target="iframe2">Soma ICMS XML</div>
+  -->
+</div>
+
+<div class="tab-content">
+  <iframe id="iframe1" class="active" src="Master_Game.html"></iframe>
+  <!-- <iframe id="iframe2" src="SomaICMS_XML.html"></iframe>
+   -->
+ 
+  </div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const iframes = document.querySelectorAll('iframe');
+ // const iframe = document.getElementById("iframe4");
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Remove active das abas
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const target = tab.getAttribute('data-target');
+
+      // Esconde todos os iframes
+      iframes.forEach(f => {
+        if (f.id === target) {
+          f.classList.add('active');
+        } else {
+          f.classList.remove('active');
+        }
+      });
+    });
+  });
+
+  // Evitar recarregar o iframe com o link inicial após o login
+      /*  iframe.onload = () => {
+            const currentSrc = iframe.contentWindow.location.href;
+            if (!currentSrc.includes("login")) {
+                console.log("Página de login concluída:", currentSrc);
+            }
+        };*/
+</script>
+
+</body>
+</html>
