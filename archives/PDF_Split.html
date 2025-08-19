@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split PDF Pages</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+        #status {
+            margin-top: 10px;
+            color: #333;
+            max-width: 600px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <input type="file" id="pdfInput" accept=".pdf" />
+    <button id="splitButton" disabled>Split and Download ZIP</button>
+    <div id="status"></div>
+
+    <script>
+        const pdfInput = document.getElementById('pdfInput');
+        const splitButton = document.getElementById('splitButton');
+        const statusDiv = document.getElementById('status');
+
+        // Verifica se as bibliotecas necessárias estão carregadas
+        function checkLibraries() {
+            if (!window.PDFLib || !window.JSZip || !window.saveAs) {
+                statusDiv.textContent = 'Error: One or more required libraries (PDFLib, JSZip, FileSaver) failed to load. Please check your internet connection.';
+                return false;
+            }
+            return true;
+        }
+
+        pdfInput.addEventListener('change', () => {
+            if (pdfInput.files.length) {
+                splitButton.disabled = false;
+                statusDiv.textContent = 'PDF selected. Click the button to split.';
+            } else {
+                splitButton.disabled = true;
+                statusDiv.textContent = '';
+            }
+        });
+
+        splitButton.addEventListener('click', async () => {
+            if (!pdfInput.files.length) {
+                statusDiv.textContent = 'Please select a PDF file first.';
+                return;
+            }
+
+            if (!checkLibraries()) {
+                splitButton.disabled = false;
+                return;
+            }
+
+            statusDiv.textContent = 'Processing PDF...';
+            splitButton.disabled = true;
+
+            try {
+                const file = pdfInput.files[0];
+                if (!file.type.includes('pdf')) {
+                    throw new Error('Selected file is not a valid PDF.');
+                }
+
+                const arrayBuffer = await file.arrayBuffer();
+                const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+                const pageCount = pdfDoc.getPageCount();
+                statusDiv.textContent = `Splitting ${pageCount} page(s)...`;
+
+                const zip = new JSZip();
+
+                // Process each page
+                for (let i = 0; i < pageCount; i++) {
+                    const newPdf = await PDFLib.PDFDocument.create();
+                    const [page] = await newPdf.copyPages(pdfDoc, [i]);
+                    newPdf.addPage(page);
+                    const pdfBytes = await newPdf.save();
+                    zip.file(`page_${i + 1}.pdf`, pdfBytes);
+                    statusDiv.textContent = `Processed page ${i + 1} of ${pageCount}...`;
+                }
+
+                // Generate and trigger ZIP download
+                statusDiv.textContent = 'Generating ZIP file...';
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                saveAs(zipBlob, 'split_pages.zip');
+                statusDiv.textContent = 'ZIP file downloaded successfully!';
+            } catch (error) {
+                console.error('Error details:', error);
+                statusDiv.textContent = `Error: ${error.message}. Check the console for more details.`;
+            } finally {
+                splitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
