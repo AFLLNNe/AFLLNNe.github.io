@@ -11,49 +11,96 @@
         #feedback { margin-top: 20px; color: green; }
         #metrics { margin-top: 20px; }
         button { padding: 10px; margin-top: 10px; }
+        #menu, #language-menu { margin-bottom: 20px; }
+        select { padding: 5px; margin-right: 10px; }
     </style>
 </head>
 <body>
-    <h1>Jogo de Perguntas e Respostas</h1>
-    <p>Responda às perguntas para desafiar seu conhecimento. A dificuldade ajusta com base no seu desempenho. O jogo continua até você fechar a página.</p>
-    <div id="question"></div>
-    <div id="options"></div>
-    <button id="submit" style="display: none;">Enviar Resposta</button>
-    <div id="feedback"></div>
-    <div id="metrics"></div>
-    <button id="next" style="display: none;">Próxima Pergunta</button>
+    <h1 id="title">Jogo de Perguntas e Respostas</h1>
+    <p id="instructions">Responda às perguntas para desafiar seu conhecimento. A dificuldade ajusta com base no seu desempenho. O jogo continua até você fechar a página.</p>
+    <div id="language-menu">
+        <label for="language">Escolha o idioma:</label>
+        <select id="language">
+            <option value="pt">Português</option>
+            <option value="en">Inglês</option>
+            <option value="es">Espanhol</option>
+            <option value="fr">Francês</option>
+            <option value="de">Alemão</option>
+            <option value="it">Italiano</option>
+        </select>
+        <button id="select-language">Selecionar Idioma</button>
+    </div>
+    <div id="menu" style="display: none;">
+        <label for="category">Escolha uma categoria:</label>
+        <select id="category">
+            <option value="random">Random</option>
+            <option value="9">Conhecimento Geral</option>
+            <option value="10">Livros</option>
+            <option value="11">Filmes</option>
+            <option value="12">Música</option>
+            <option value="13">Musicais e Teatro</option>
+            <option value="14">Televisão</option>
+            <option value="15">Jogos Populares (Minecraft, GTA, LoL, Fortnite, Roblox)</option>
+            <option value="16">Jogos de Tabuleiro</option>
+            <option value="17">Ciência e Natureza</option>
+            <option value="18">Computação</option>
+            <option value="19">Matemática</option>
+            <option value="20">Mitologia</option>
+            <option value="21">Esportes</option>
+            <option value="22">Geografia</option>
+            <option value="23">História</option>
+            <option value="24">Política</option>
+            <option value="25">Arte</option>
+            <option value="26">Celebridades</option>
+            <option value="27">Animais</option>
+            <option value="28">Veículos</option>
+            <option value="29">Quadrinhos</option>
+            <option value="30">Gadgets</option>
+            <option value="31">Anime e Mangá</option>
+            <option value="32">Desenhos e Animações</option>
+        </select>
+        <button id="start">Iniciar Jogo</button>
+    </div>
+    <div id="game" style="display: none;">
+        <div id="question"></div>
+        <div id="options"></div>
+        <button id="submit" style="display: none;">Enviar Resposta</button>
+        <div id="feedback"></div>
+        <div id="metrics"></div>
+        <button id="next" style="display: none;">Próxima Pergunta</button>
+    </div>
 
     <script>
-        // Categorias do Open Trivia DB mapeadas para áreas amplas, incluindo +18 se aplicável (API é geral, mas cobre temas adultos em celebridades, filmes, etc.)
+        // Categorias do Open Trivia DB mapeadas para áreas amplas
         const categories = [
-            9,  // General Knowledge (Curiosidades, Marcas, etc.)
-            10, // Books (Literatura)
-            11, // Film (Cinema, Filmes de Terror/Comédia)
-            12, // Music (Música, Pop, Clássica)
-            13, // Musicals & Theatres (Artes)
-            14, // Television (Séries de TV)
-            15, // Video Games (Jogos de Vídeo Game)
-            16, // Board Games (Jogos e Brincadeiras)
-            17, // Science & Nature (Ciência, Biologia, Astronomia, Animais, Plantas)
-            18, // Computers (Computação, Tecnologia)
-            19, // Mathematics (Matemática, Lógica)
-            20, // Mythology (Mitologia, Mitos e Lendas, Religião)
-            21, // Sports (Esportes)
-            22, // Geography (Geografia, Países e Capitais)
-            23, // History (História Mundial, Personagens Históricos)
-            24, // Politics (Política e Atualidades)
-            25, // Art (Pintura, Escultura)
-            26, // Celebrities (Celebridades, Moda, +18 possíveis)
-            27, // Animals (Animais)
-            28, // Vehicles (Meios de Transporte)
-            29, // Comics (Super-heróis)
-            30, // Gadgets (Invenções, Tecnologia)
-            31, // Anime & Manga (Animações)
-            32  // Cartoon & Animations (Desenhos)
+            9,  // General Knowledge
+            10, // Books
+            11, // Film
+            12, // Music
+            13, // Musicals & Theatres
+            14, // Television
+            15, // Video Games
+            16, // Board Games
+            17, // Science & Nature
+            18, // Computers
+            19, // Mathematics
+            20, // Mythology
+            21, // Sports
+            22, // Geography
+            23, // History
+            24, // Politics
+            25, // Art
+            26, // Celebrities
+            27, // Animals
+            28, // Vehicles
+            29, // Comics
+            30, // Gadgets
+            31, // Anime & Manga
+            32  // Cartoon & Animations
         ];
         const totalCategories = categories.length;
 
-        // Categorias consideradas "atuais" para AC (Política, Celebridades, Filmes, Música, TV, Jogos)
+        // Categorias consideradas "atuais" para AC
         const currentCategories = [11, 12, 14, 15, 24, 26];
 
         // Variáveis do jogo
@@ -65,11 +112,106 @@
         let depthPoints = 0;
         let currentTopicsCount = 0;
         let currentTopicsCorrect = 0;
-        let analyticalCorrect = 0; // Para CA, categorias lógicas: Math, Science, Computers
+        let analyticalCorrect = 0;
         let analyticalCount = 0;
         const analyticalCategories = [17, 18, 19];
         let currentQuestion = null;
         let selectedOption = null;
+        let selectedCategory = 'random';
+        let selectedLanguage = 'pt';
+
+        // Traduções para elementos da interface
+        const translations = {
+            pt: {
+                title: 'Jogo de Perguntas e Respostas',
+                instructions: 'Responda às perguntas para desafiar seu conhecimento. A dificuldade ajusta com base no seu desempenho. O jogo continua até você fechar a página.',
+                selectLanguage: 'Selecionar Idioma',
+                chooseCategory: 'Escolha uma categoria:',
+                start: 'Iniciar Jogo',
+                submit: 'Enviar Resposta',
+                next: 'Próxima Pergunta',
+                correct: 'Correto!',
+                wrong: 'Errado! A resposta correta é:',
+                noQuestions: 'Nenhuma pergunta disponível no momento. Usando uma pergunta genérica.',
+                error: 'Erro ao carregar perguntas. Tente novamente.'
+            },
+            en: {
+                title: 'Trivia Game',
+                instructions: 'Answer the questions to challenge your knowledge. The difficulty adjusts based on your performance. The game continues until you close the page.',
+                selectLanguage: 'Select Language',
+                chooseCategory: 'Choose a category:',
+                start: 'Start Game',
+                submit: 'Submit Answer',
+                next: 'Next Question',
+                correct: 'Correct!',
+                wrong: 'Wrong! The correct answer is:',
+                noQuestions: 'No questions available at the moment. Using a generic question.',
+                error: 'Error loading questions. Please try again.'
+            },
+            es: {
+                title: 'Juego de Preguntas y Respuestas',
+                instructions: 'Responde las preguntas para desafiar tu conocimiento. La dificultad se ajusta según tu rendimiento. El juego continúa hasta que cierres la página.',
+                selectLanguage: 'Seleccionar Idioma',
+                chooseCategory: 'Elige una categoría:',
+                start: 'Iniciar Juego',
+                submit: 'Enviar Respuesta',
+                next: 'Siguiente Pregunta',
+                correct: '¡Correcto!',
+                wrong: '¡Incorrecto! La respuesta correcta es:',
+                noQuestions: 'No hay preguntas disponibles en este momento. Usando una pregunta genérica.',
+                error: 'Error al cargar preguntas. Intenta de nuevo.'
+            },
+            fr: {
+                title: 'Jeu de Questions et Réponses',
+                instructions: 'Répondez aux questions pour tester vos connaissances. La difficulté s’ajuste en fonction de vos performances. Le jeu continue jusqu’à ce que vous fermiez la page.',
+                selectLanguage: 'Sélectionner la Langue',
+                chooseCategory: 'Choisissez une catégorie :',
+                start: 'Démarrer le Jeu',
+                submit: 'Soumettre la Réponse',
+                next: 'Question Suivante',
+                correct: 'Correct !',
+                wrong: 'Faux ! La réponse correcte est :',
+                noQuestions: 'Aucune question disponible pour le moment. Utilisation d’une question générique.',
+                error: 'Erreur lors du chargement des questions. Veuillez réessayer.'
+            },
+            de: {
+                title: 'Quizspiel',
+                instructions: 'Beantworten Sie die Fragen, um Ihr Wissen zu testen. Der Schwierigkeitsgrad passt sich Ihrer Leistung an. Das Spiel geht weiter, bis Sie die Seite schließen.',
+                selectLanguage: 'Sprache Auswählen',
+                chooseCategory: 'Wählen Sie eine Kategorie:',
+                start: 'Spiel Starten',
+                submit: 'Antwort Senden',
+                next: 'Nächste Frage',
+                correct: 'Richtig!',
+                wrong: 'Falsch! Die richtige Antwort ist:',
+                noQuestions: 'Derzeit sind keine Fragen verfügbar. Verwende eine generische Frage.',
+                error: 'Fehler beim Laden der Fragen. Bitte versuchen Sie es erneut.'
+            },
+            it: {
+                title: 'Gioco di Domande e Risposte',
+                instructions: 'Rispondi alle domande per mettere alla prova le tue conoscenze. La difficoltà si adatta in base alle tue prestazioni. Il gioco continua finché non chiudi la pagina.',
+                selectLanguage: 'Seleziona Lingua',
+                chooseCategory: 'Scegli una categoria:',
+                start: 'Inizia Gioco',
+                submit: 'Invia Risposta',
+                next: 'Prossima Domanda',
+                correct: 'Corretto!',
+                wrong: 'Sbagliato! La risposta corretta è:',
+                noQuestions: 'Nessuna domanda disponibile al momento. Uso di una domanda generica.',
+                error: 'Errore nel caricamento delle domande. Riprova.'
+            }
+        };
+
+        // Função de tradução simulada para perguntas
+        function translateText(text, lang) {
+            // Simulação: prefixar o idioma para demonstração
+            // Em produção, usar uma API como Google Translate
+            if (lang === 'en') return text; // Já em inglês
+            return `[${lang.toUpperCase()}] ${text}`; // Simulação: adiciona prefixo do idioma
+            // Para uma tradução real, você precisaria de uma API. Exemplo:
+            // const response = await fetch(`https://translation-api.example.com/translate?text=${encodeURIComponent(text)}&target=${lang}`);
+            // return response.json().translatedText;
+        }
 
         // Mapear nível para dificuldade
         function getDifficulty(level) {
@@ -91,7 +233,7 @@
             const pk = correctCount > 0 ? depthPoints / correctCount : 0;
             const ca = analyticalCount > 0 ? (analyticalCorrect / analyticalCount) * 100 : 0;
             const ac = currentTopicsCount > 0 ? (currentTopicsCorrect / currentTopicsCount) * 100 : 0;
-            const sc = (correctCount / questionCount) * 100; // Síntese como accuracy geral, já que multiple choice
+            const sc = (correctCount / questionCount) * 100;
 
             return { AK: ak.toFixed(2), PK: pk.toFixed(2), CA: ca.toFixed(2), AC: ac.toFixed(2), SC: sc.toFixed(2) };
         }
@@ -99,30 +241,59 @@
         // Mostrar feedback rápido ou completo
         function showFeedback() {
             const metrics = calculateMetrics();
-            let feedbackText = `Perguntas respondidas: ${questionCount} | Corretas: ${correctCount} | Nível: ${currentLevel}\n`;
-            feedbackText += `Métricas Rápidas: AK=${metrics.AK}%, PK=${metrics.PK}, CA=${metrics.CA}%, AC=${metrics.AC}%, SC=${metrics.SC}%`;
+            let feedbackText = `${translations[selectedLanguage].questionsAnswered}: ${questionCount} | ${translations[selectedLanguage].correctAnswers}: ${correctCount} | ${translations[selectedLanguage].level}: ${currentLevel}\n`;
+            feedbackText += `${translations[selectedLanguage].quickMetrics}: AK=${metrics.AK}%, PK=${metrics.PK}, CA=${metrics.CA}%, AC=${metrics.AC}%, SC=${metrics.SC}%`;
 
             if (questionCount % 20 === 0) {
-                feedbackText = `Relatório Detalhado:\n`;
-                feedbackText += `- Amplitude de Conhecimento (AK): ${metrics.AK}% (diversidade de áreas)\n`;
-                feedbackText += `- Profundidade de Conhecimento (PK): ${metrics.PK} (detalhes por tema)\n`;
-                feedbackText += `- Capacidade Analítica (CA): ${metrics.CA}% (lógica e raciocínio)\n`;
-                feedbackText += `- Atualização Cultural (AC): ${metrics.AC}% (eventos contemporâneos)\n`;
-                feedbackText += `- Síntese & Criatividade (SC): ${metrics.SC}% (síntese geral)\n`;
-                feedbackText += `Progresso: Nível ${currentLevel} de 7. Continue para avançar!`;
+                feedbackText = `${translations[selectedLanguage].detailedReport}:\n`;
+                feedbackText += `- ${translations[selectedLanguage].knowledgeBreadth} (AK): ${metrics.AK}% (${translations[selectedLanguage].categoryDiversity})\n`;
+                feedbackText += `- ${translations[selectedLanguage].knowledgeDepth} (PK): ${metrics.PK} (${translations[selectedLanguage].topicDetails})\n`;
+                feedbackText += `- ${translations[selectedLanguage].analyticalAbility} (CA): ${metrics.CA}% (${translations[selectedLanguage].logicReasoning})\n`;
+                feedbackText += `- ${translations[selectedLanguage].culturalAwareness} (AC): ${metrics.AC}% (${translations[selectedLanguage].currentEvents})\n`;
+                feedbackText += `- ${translations[selectedLanguage].synthesisCreativity} (SC): ${metrics.SC}% (${translations[selectedLanguage].generalSynthesis})\n`;
+                feedbackText += `${translations[selectedLanguage].progress}: ${translations[selectedLanguage].level} ${currentLevel} de 7. ${translations[selectedLanguage].continueToAdvance}!`;
             }
 
             document.getElementById('metrics').innerText = feedbackText;
         }
 
-        // Buscar pergunta da API
+        // Buscar pergunta da API com retry
         async function fetchQuestion() {
-            const cat = categories[Math.floor(Math.random() * categories.length)];
-            const diff = getDifficulty(currentLevel);
-            const url = `https://opentdb.com/api.php?amount=1&category=${cat}&difficulty=${diff}&type=multiple`;
+            let attempts = 0;
+            const maxAttempts = 3;
+            let cat = selectedCategory === 'random' ? categories[Math.floor(Math.random() * categories.length)] : selectedCategory;
+            let diff = getDifficulty(currentLevel);
+
+            while (attempts < maxAttempts) {
+                try {
+                    const url = `https://opentdb.com/api.php?amount=1&category=${cat}&difficulty=${diff}&type=multiple`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data.results && data.results.length > 0) {
+                        return data.results[0];
+                    } else {
+                        attempts++;
+                        if (attempts < maxAttempts) {
+                            cat = categories[Math.floor(Math.random() * categories.length)];
+                            diff = attempts === 1 ? 'medium' : 'easy';
+                        }
+                    }
+                } catch (error) {
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        cat = categories[Math.floor(Math.random() * categories.length)];
+                        diff = attempts === 1 ? 'medium' : 'easy';
+                    }
+                }
+            }
+
+            document.getElementById('feedback').innerText = translations[selectedLanguage].noQuestions;
+            document.getElementById('feedback').style.color = 'orange';
+            const url = `https://opentdb.com/api.php?amount=1&category=9&type=multiple`;
             const response = await fetch(url);
             const data = await response.json();
-            return data.results[0];
+            return data.results[0] || null;
         }
 
         // Embaralhar opções
@@ -134,14 +305,21 @@
             return array;
         }
 
-        // Exibir pergunta
+        // Exibir pergunta com tradução
         async function displayQuestion() {
             currentQuestion = await fetchQuestion();
-            document.getElementById('question').innerHTML = currentQuestion.question;
+            if (!currentQuestion) {
+                document.getElementById('feedback').innerText = translations[selectedLanguage].error;
+                document.getElementById('feedback').style.color = 'red';
+                return;
+            }
+            const translatedQuestion = await translateText(currentQuestion.question, selectedLanguage);
+            document.getElementById('question').innerHTML = translatedQuestion;
             const options = [...currentQuestion.incorrect_answers, currentQuestion.correct_answer];
-            shuffle(options);
+            const translatedOptions = await Promise.all(options.map(opt => translateText(opt, selectedLanguage)));
+            shuffle(translatedOptions);
             let optionsHtml = '';
-            options.forEach((opt, index) => {
+            translatedOptions.forEach((opt, index) => {
                 optionsHtml += `<div class="option"><input type="radio" name="answer" id="opt${index}" value="${opt}"><label for="opt${index}">${opt}</label></div>`;
             });
             document.getElementById('options').innerHTML = optionsHtml;
@@ -151,29 +329,26 @@
         }
 
         // Verificar resposta
-        function checkAnswer() {
+        async function checkAnswer() {
             const selected = document.querySelector('input[name="answer"]:checked');
-            if (!selected) return alert('Selecione uma opção!');
+            if (!selected) return alert(translations[selectedLanguage].selectOption);
             selectedOption = selected.value;
-            const isCorrect = selectedOption === currentQuestion.correct_answer;
-            const cat = parseInt(currentQuestion.category.replace(/.*: /, '')) || 9; // Extrair ID se possível, mas API retorna nome, wait.
-
-            // API retorna category como string, e.g. "Science & Nature", so map back to ID? But for tracking, use the name as key.
-
-            // Melhor: usar nome da categoria para set.
+            const correctAnswerTranslated = await translateText(currentQuestion.correct_answer, selectedLanguage);
+            const isCorrect = selectedOption === correctAnswerTranslated;
             const catName = currentQuestion.category;
+
             if (isCorrect) {
                 correctCount++;
                 streak++;
                 categoriesAnswered.add(catName);
                 depthPoints += getDepthPoints(currentQuestion.difficulty);
-                if (currentCategories.some(id => currentQuestion.category.includes(id.toString()))) { // Rough match
+                if (selectedCategory === 'random' || currentCategories.includes(parseInt(selectedCategory))) {
                     currentTopicsCorrect++;
                 }
-                if (analyticalCategories.some(id => currentQuestion.category.includes(id.toString()))) {
+                if (selectedCategory === 'random' || analyticalCategories.includes(parseInt(selectedCategory))) {
                     analyticalCorrect++;
                 }
-                document.getElementById('feedback').innerText = 'Correto! ' + currentQuestion.correct_answer;
+                document.getElementById('feedback').innerText = `${translations[selectedLanguage].correct} ${correctAnswerTranslated}`;
                 document.getElementById('feedback').style.color = 'green';
                 if (streak >= 3 && currentLevel < 7) {
                     currentLevel++;
@@ -181,17 +356,17 @@
                 }
             } else {
                 streak = 0;
-                document.getElementById('feedback').innerText = 'Errado! A resposta correta é: ' + currentQuestion.correct_answer;
+                document.getElementById('feedback').innerText = `${translations[selectedLanguage].wrong} ${correctAnswerTranslated}`;
                 document.getElementById('feedback').style.color = 'red';
                 if (questionCount % 5 === 0 && currentLevel > 1 && streak === 0) {
                     currentLevel--;
                 }
             }
             questionCount++;
-            if (currentCategories.some(id => currentQuestion.category.includes(id.toString()))) {
+            if (selectedCategory === 'random' || currentCategories.includes(parseInt(selectedCategory))) {
                 currentTopicsCount++;
             }
-            if (analyticalCategories.some(id => currentQuestion.category.includes(id.toString()))) {
+            if (selectedCategory === 'random' || analyticalCategories.includes(parseInt(selectedCategory))) {
                 analyticalCount++;
             }
             document.getElementById('submit').style.display = 'none';
@@ -202,10 +377,37 @@
             }
         }
 
+        // Atualizar interface com idioma selecionado
+        function updateInterfaceLanguage() {
+            const lang = translations[selectedLanguage];
+            document.getElementById('title').innerText = lang.title;
+            document.getElementById('instructions').innerText = lang.instructions;
+            document.getElementById('select-language').innerText = lang.selectLanguage;
+            document.getElementById('category').previousElementSibling.innerText = lang.chooseCategory;
+            document.getElementById('start').innerText = lang.start;
+            document.getElementById('submit').innerText = lang.submit;
+            document.getElementById('next').innerText = lang.next;
+        }
+
+        // Selecionar idioma
+        function selectLanguage() {
+            selectedLanguage = document.getElementById('language').value;
+            updateInterfaceLanguage();
+            document.getElementById('language-menu').style.display = 'none';
+            document.getElementById('menu').style.display = 'block';
+        }
+
         // Iniciar jogo
-        displayQuestion();
+        function startGame() {
+            selectedCategory = document.getElementById('category').value;
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            displayQuestion();
+        }
 
         // Eventos
+        document.getElementById('select-language').addEventListener('click', selectLanguage);
+        document.getElementById('start').addEventListener('click', startGame);
         document.getElementById('submit').addEventListener('click', checkAnswer);
         document.getElementById('next').addEventListener('click', displayQuestion);
     </script>
