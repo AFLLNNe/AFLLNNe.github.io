@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Processador de XML NFe</title>
     <style>
-        /* Estilização para riscar linhas marcadas */
         .strikethrough {
             text-decoration: line-through;
         }
-        /* Estilização para ocultar linhas riscadas quando necessário */
         .hidden {
             display: none;
         }
-        /* Estilização da caixa de resumo ao lado da tabela */
         .summary-box {
             border: 1px solid black;
             padding: 10px;
@@ -23,7 +20,8 @@
         }
     </style>
     <script>
-        let itemData = {}; // Objeto global que armazenará os dados dos itens agrupados por NCM e pICMS
+        let itemData = {}; 
+        let vFreteGlobal = 0; // 🔹 Variável global do frete
 
         function processXML() {
             const fileInput = document.getElementById("xmlFile");
@@ -53,6 +51,9 @@
                     <strong>Empresa:</strong> ${xNome} | <strong>CNPJ:</strong> ${cnpj} <br>
                     <strong>Nota:</strong> ${nNF} | <strong>Chave:</strong> ${infNFeId}
                 `;
+
+                // 🔹 Pega o valor do vFrete do total
+                vFreteGlobal = parseFloat(xmlDoc.getElementsByTagName("vFrete")[0]?.textContent) || 0;
 
                 const items = xmlDoc.getElementsByTagName("det");
                 const icmsData = {};
@@ -103,6 +104,7 @@
                         <td>${picms.toFixed(2)}</td>
                         <td>${vicms.toFixed(2)}</td>
                         <td>${vipi.toFixed(2)}</td>
+                        <td>${vFreteGlobal.toFixed(2)}</td> <!-- 🔹 Mostra o frete -->
                         <td>${quantidade.toFixed(2)}</td>
                         <td><button onclick="event.stopPropagation(); toggleStrikethrough('${rowId}')">Riscado</button></td>
                     </tr>`;
@@ -161,6 +163,9 @@
             Object.entries(totalPorPICMS).forEach(([picms, total]) => {
                 totalSumBox.innerHTML += `<div><strong>Total para pICMS ${picms}:</strong> R$ ${total.toFixed(2)}</div>`;
             });
+
+            // 🔹 Mostra o frete também no resumo
+            //totalSumBox.innerHTML += `<div><strong>vFrete da NFe:</strong> R$ ${vFreteGlobal.toFixed(2)}</div>`;
         }
     </script>
 </head>
@@ -168,9 +173,8 @@
 
     <h2>Importar XML da Nota Fiscal Eletrônica</h2>
     <div style="position: absolute; top: 10px; right: 20px; font-size: 14px; color: #333;">
-  AAC by Alexandre Fellinne
-  <p>
-</div>
+        AAC by Alexandre Fellinne
+    </div>
     
     <input type="file" id="xmlFile" accept=".xml">
     <button onclick="processXML()">Processar</button>
@@ -191,6 +195,7 @@
                 <th>pICMS</th>
                 <th>Soma vICMS</th>
                 <th>Soma vIPI</th>
+                <th>vFrete</th> <!-- 🔹 Nova coluna -->
                 <th>Soma Quantidade</th>
                 <th>Ação</th>
             </tr>
