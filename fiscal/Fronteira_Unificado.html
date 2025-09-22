@@ -30,20 +30,6 @@
     padding: 0;
     height: 400px; /* altura fixa para o iframe */
   }
-  .useful-links-list {
-    list-style-type: none;
-    padding: 0;
-   }
-   .useful-link-item {
-     margin-bottom: 10px;
-   }
-   .useful-link {
-     text-decoration: none;
-     color: #007BFF;
-   }
-    .useful-link:hover {
-      text-decoration: underline;
-   }
   iframe {
     width: 100%;
     height: 125%;
@@ -53,24 +39,38 @@
   iframe.active {
     display: block;
   }
+  /* botão atualizar */
+  #refreshBtn {
+    margin-bottom: 10px;
+    padding: 8px 15px;
+    border: none;
+    background: #007BFF;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  #refreshBtn:hover {
+    background: #0056b3;
+  }
 </style>
 </head>
 <body>
 
-<!--<h2>Abas com iframes (mantém estado ao trocar aba)</h2>-->
+<!-- Botão para atualizar todos os iframes -->
+<button id="refreshBtn">🔄 Atualizar todos</button>
 
 <div class="tabs">
   <div class="tab active" data-target="iframe1">Calculos Fronteira</div>
   <div class="tab" data-target="iframe2">Soma ICMS XML</div>
   <div class="tab" data-target="iframe3">Banco CFOP</div>
   <div class="tab" data-target="iframe4">FiltroXMLs</div>
-   <div class="tab" data-target="iframe5">XML Produtos Lote</div>
+  <div class="tab" data-target="iframe5">XML Produtos Lote</div>
   <div class="tab" data-target="iframe6">Faturamento</div>
   <div class="tab" data-target="iframe7">Page500</div>
   <div class="tab" data-target="iframe8">Copiar Texto</div>
   <div class="tab" data-target="iframe9">SomaNotas</div>
   <div class="tab" data-target="iframe10">Links Uteis</div>
-  
 </div>
 
 <div class="tab-content">
@@ -84,13 +84,11 @@
   <iframe id="iframe8" src="CopiarTextos.html"></iframe>
   <iframe id="iframe9" src="SomaNotas.html"></iframe>
   <iframe id="iframe10" src="Links_Uteis.html"></iframe>
-  
-  </div>
+</div>
 
 <script>
   const tabs = document.querySelectorAll('.tab');
   const iframes = document.querySelectorAll('iframe');
- // const iframe = document.getElementById("iframe4");
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -111,13 +109,12 @@
     });
   });
 
-  // Evitar recarregar o iframe com o link inicial após o login
-      /*  iframe.onload = () => {
-            const currentSrc = iframe.contentWindow.location.href;
-            if (!currentSrc.includes("login")) {
-                console.log("Página de login concluída:", currentSrc);
-            }
-        };*/
+  // 🔄 Atualizar todos os iframes
+  document.getElementById("refreshBtn").addEventListener("click", () => {
+    iframes.forEach(f => {
+      f.src = f.src; // força reload
+    });
+  });
 </script>
 
 </body>
