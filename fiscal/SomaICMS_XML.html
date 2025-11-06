@@ -43,12 +43,14 @@
 
                 const cnpj = empresaNode?.getElementsByTagName("CNPJ")[0]?.textContent || "Não encontrado";
                 const xNome = empresaNode?.getElementsByTagName("xNome")[0]?.textContent || "Não encontrado";
+				const natOp = xmlDoc.getElementsByTagName("natOp")[0]?.textContent || "Não encontrado";
                 const nNF = xmlDoc.getElementsByTagName("nNF")[0]?.textContent || "Não encontrado";
                 let infNFeId = xmlDoc.getElementsByTagName("infNFe")[0]?.getAttribute("Id") || "Não encontrado";
                 infNFeId = infNFeId.replace("NFe", ""); 
 
                 document.getElementById("empresaInfo").innerHTML = `
                     <strong>Empresa:</strong> ${xNome} | <strong>CNPJ:</strong> ${cnpj} <br>
+					<strong>Natureza da operação:<strong> ${natOp}<br>
                     <strong>Nota:</strong> ${nNF} | <strong>Chave:</strong> ${infNFeId}
                 `;
 
