@@ -38,6 +38,29 @@
             line-height: 20px;
             font-weight: bold;
         }
+        .expand-btn {
+            cursor: pointer;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        .nf-box {
+            display: none;
+            border: 1px solid #ccc;
+            background-color: #fafafa;
+            padding: 8px;
+            margin-top: 5px;
+            font-size: 13px;
+            max-width: 450px;
+            border-radius: 4px;
+            box-shadow: 0px 0px 5px rgba(0,0,0,0.1);
+            word-wrap: break-word;
+        }
     </style>
     <script>
         let itemData = {}; // Armazena itens agrupados por descrição
@@ -61,7 +84,7 @@
             for (let i = 0; i < total; i++) {
                 await readXMLFile(files[i]);
                 updateProgress(((i + 1) / total) * 100);
-                if (i % 50 === 0) await new Promise(r => setTimeout(r, 0)); // Liberar o thread de tempo em tempo
+                if (i % 50 === 0) await new Promise(r => setTimeout(r, 0)); // Evita travar a UI
             }
             renderTable();
         }
@@ -74,6 +97,9 @@
                     const parser = new DOMParser();
                     const xmlDoc = parser.parseFromString(xmlText, "application/xml");
 
+                    // Captura o valor do atributo Id do infNFe, removendo o prefixo "NFe"
+                    const infNFe = xmlDoc.getElementsByTagName("infNFe")[0]?.getAttribute("Id")?.replace("NFe", "") || "Sem chave";
+
                     const items = xmlDoc.getElementsByTagName("det");
                     for (let item of items) {
                         const descricao = item.getElementsByTagName("xProd")[0]?.textContent || "Sem descrição";
@@ -82,11 +108,16 @@
                         const valorTotal = parseFloat(item.getElementsByTagName("vProd")[0]?.textContent) || 0;
 
                         if (!itemData[descricao]) {
-                            itemData[descricao] = { quantidade: 0, valorTotal: 0, valorUnitario: valorUnitario, lista: [] };
+                            itemData[descricao] = { 
+                                quantidade: 0, 
+                                valorTotal: 0, 
+                                valorUnitario: valorUnitario, 
+                                chaves: new Set() // armazenar chaves únicas
+                            };
                         }
                         itemData[descricao].quantidade += quantidade;
                         itemData[descricao].valorTotal += valorTotal;
-                       // itemData[descricao].lista.push({ quantidade, valorUnitario, valorTotal });
+                        itemData[descricao].chaves.add(infNFe);
                     }
                     resolve();
                 };
@@ -108,25 +139,34 @@
             const fragment = document.createDocumentFragment();
 
             entries.forEach(([descricao, data]) => {
-                const rowSpan = data.lista.length;
-                const headerRow = document.createElement("tr");
-                headerRow.classList.add("item-header");
-                headerRow.innerHTML = `
-                    <td rowspan="${rowSpan + 1}">${descricao}</td>
-                    <td rowspan="${rowSpan + 1}">${data.quantidade.toFixed(2)}</td>
-                    <td rowspan="${rowSpan + 1}">${data.valorUnitario.toFixed(2)}</td>
-                    <td rowspan="${rowSpan + 1}">${data.valorTotal.toFixed(2)}</td>
+                const chavesArray = Array.from(data.chaves);
+                const row = document.createElement("tr");
+                row.classList.add("item-header");
+                row.innerHTML = `
+                    <td>${descricao}</td>
+                    <td>${data.quantidade.toFixed(2)}</td>
+                    <td>${data.valorUnitario.toFixed(2)}</td>
+                    <td>${data.valorTotal.toFixed(2)}</td>
+                    <td>
+                        <button class="expand-btn" onclick="toggleNotas(this)">+</button>
+                        <div class="nf-box">${chavesArray.join(", ")}</div>
+                    </td>
                 `;
-                fragment.appendChild(headerRow);
-
-                data.lista.forEach(item => {
-                    const subRow = document.createElement("tr");
-                    subRow.innerHTML = `<td colspan="4">Qtd: ${item.quantidade.toFixed(2)} | Unit: ${item.valorUnitario.toFixed(2)} | Total: ${item.valorTotal.toFixed(2)}</td>`;
-                    fragment.appendChild(subRow);
-                });
+                fragment.appendChild(row);
             });
 
             itemTable.appendChild(fragment);
+        }
+
+        function toggleNotas(button) {
+            const box = button.nextElementSibling;
+            if (box.style.display === "block") {
+                box.style.display = "none";
+                button.textContent = "+";
+            } else {
+                box.style.display = "block";
+                button.textContent = "−";
+            }
         }
     </script>
 </head>
@@ -153,6 +193,7 @@
                 <th>Quantidade Total</th>
                 <th>Valor Unitário</th>
                 <th>Valor Total</th>
+                <th>Chaves NFe</th>
             </tr>
         </thead>
         <tbody id="itemTable"></tbody>
