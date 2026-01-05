@@ -4,18 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Processador de XML NFe</title>
+
     <style>
-        .summary-box {
-            border: 1px solid black;
-            padding: 10px;
-            margin-left: 20px;
-            display: inline-block;
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px 8px;
+            text-align: left;
             vertical-align: top;
         }
-        .item-header {
-            background-color: #f4f4f4;
-            font-weight: bold;
+
+        th {
+            background-color: #eaeaea;
         }
+
+        .item-header {
+            background-color: #f9f9f9;
+        }
+
         .progress-bar {
             width: 100%;
             background-color: #f4f4f4;
@@ -24,12 +40,14 @@
             margin: 15px 0;
             position: relative;
         }
+
         .progress-bar-inner {
             height: 100%;
             background-color: #4caf50;
             width: 0%;
             transition: width 0.1s linear;
         }
+
         .progress-text {
             position: absolute;
             width: 100%;
@@ -38,6 +56,7 @@
             line-height: 20px;
             font-weight: bold;
         }
+
         .expand-btn {
             cursor: pointer;
             background-color: #4caf50;
@@ -47,23 +66,23 @@
             width: 22px;
             height: 22px;
             font-weight: bold;
-            margin-left: 8px;
         }
+
         .nf-box {
             display: none;
             border: 1px solid #ccc;
             background-color: #fafafa;
             padding: 8px;
             margin-top: 5px;
-            font-size: 13px;
+            font-size: 12px;
             max-width: 450px;
             border-radius: 4px;
-            box-shadow: 0px 0px 5px rgba(0,0,0,0.1);
             word-wrap: break-word;
         }
     </style>
+
     <script>
-        let itemData = {}; // Armazena itens agrupados por descrição
+        let itemData = {};
 
         function updateProgress(percent) {
             const bar = document.getElementById("progressBarInner");
@@ -75,17 +94,19 @@
         async function processXML() {
             const files = document.getElementById("xmlFile").files;
             if (files.length === 0) {
-                alert("Por favor, selecione um ou mais arquivos XML.");
+                alert("Selecione um ou mais arquivos XML.");
                 return;
             }
 
             itemData = {};
             const total = files.length;
+
             for (let i = 0; i < total; i++) {
                 await readXMLFile(files[i]);
                 updateProgress(((i + 1) / total) * 100);
-                if (i % 50 === 0) await new Promise(r => setTimeout(r, 0)); // Evita travar a UI
+                if (i % 50 === 0) await new Promise(r => setTimeout(r, 0));
             }
+
             renderTable();
         }
 
@@ -93,32 +114,38 @@
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    const xmlText = event.target.result;
                     const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+                    const xmlDoc = parser.parseFromString(event.target.result, "application/xml");
 
-                    // Captura o valor do atributo Id do infNFe, removendo o prefixo "NFe"
-                    const infNFe = xmlDoc.getElementsByTagName("infNFe")[0]?.getAttribute("Id")?.replace("NFe", "") || "Sem chave";
+                    const infNFe = xmlDoc
+                        .getElementsByTagName("infNFe")[0]
+                        ?.getAttribute("Id")
+                        ?.replace("NFe", "") || "Sem chave";
 
                     const items = xmlDoc.getElementsByTagName("det");
+
                     for (let item of items) {
                         const descricao = item.getElementsByTagName("xProd")[0]?.textContent || "Sem descrição";
+                        const ncm = item.getElementsByTagName("NCM")[0]?.textContent || "Sem NCM";
                         const quantidade = parseFloat(item.getElementsByTagName("qCom")[0]?.textContent) || 0;
                         const valorUnitario = parseFloat(item.getElementsByTagName("vUnCom")[0]?.textContent) || 0;
                         const valorTotal = parseFloat(item.getElementsByTagName("vProd")[0]?.textContent) || 0;
 
                         if (!itemData[descricao]) {
-                            itemData[descricao] = { 
-                                quantidade: 0, 
-                                valorTotal: 0, 
-                                valorUnitario: valorUnitario, 
-                                chaves: new Set() // armazenar chaves únicas
+                            itemData[descricao] = {
+                                ncm: ncm,
+                                quantidade: 0,
+                                valorUnitario: valorUnitario,
+                                valorTotal: 0,
+                                chaves: new Set()
                             };
                         }
+
                         itemData[descricao].quantidade += quantidade;
                         itemData[descricao].valorTotal += valorTotal;
                         itemData[descricao].chaves.add(infNFe);
                     }
+
                     resolve();
                 };
                 reader.readAsText(file);
@@ -126,53 +153,54 @@
         }
 
         function renderTable() {
-            const itemTable = document.getElementById("itemTable");
-            const uniqueCountElement = document.getElementById("uniqueCount");
-            itemTable.innerHTML = "";
+            const tbody = document.getElementById("itemTable");
+            const uniqueCount = document.getElementById("uniqueCount");
+
+            tbody.innerHTML = "";
 
             const entries = Object.entries(itemData)
-                .filter(([descricao]) => typeof descricao === 'string' && descricao.trim() !== '')
                 .sort((a, b) => a[0].localeCompare(b[0]));
 
-            uniqueCountElement.textContent = entries.length;
-
-            const fragment = document.createDocumentFragment();
+            uniqueCount.textContent = entries.length;
 
             entries.forEach(([descricao, data]) => {
-                const chavesArray = Array.from(data.chaves);
-                const row = document.createElement("tr");
-                row.classList.add("item-header");
-                row.innerHTML = `
+                const tr = document.createElement("tr");
+                tr.className = "item-header";
+
+                tr.innerHTML = `
                     <td>${descricao}</td>
+                    <td>${data.ncm}</td>
                     <td>${data.quantidade.toFixed(2)}</td>
                     <td>${data.valorUnitario.toFixed(2)}</td>
                     <td>${data.valorTotal.toFixed(2)}</td>
                     <td>
                         <button class="expand-btn" onclick="toggleNotas(this)">+</button>
-                        <div class="nf-box">${chavesArray.join(", ")}</div>
+                        <div class="nf-box">${Array.from(data.chaves).join("<br>")}</div>
                     </td>
                 `;
-                fragment.appendChild(row);
-            });
 
-            itemTable.appendChild(fragment);
+                tbody.appendChild(tr);
+            });
         }
 
-        function toggleNotas(button) {
-            const box = button.nextElementSibling;
+        function toggleNotas(btn) {
+            const box = btn.nextElementSibling;
             if (box.style.display === "block") {
                 box.style.display = "none";
-                button.textContent = "+";
+                btn.textContent = "+";
             } else {
                 box.style.display = "block";
-                button.textContent = "−";
+                btn.textContent = "−";
             }
         }
     </script>
 </head>
+
 <body>
+
     <h2>Importar XML da Nota Fiscal Eletrônica (Lote)</h2>
-    <div style="position: absolute; top: 10px; right: 20px; font-size: 14px; color: #333;">
+
+    <div style="position:absolute; top:10px; right:20px; font-size:13px;">
         AAC by Alexandre Fellinne
     </div>
 
@@ -185,11 +213,13 @@
     </div>
 
     <h3>Itens Agrupados por Descrição</h3>
-    <div><strong>Itens Únicos:</strong> <span id="uniqueCount">0</span></div>
-    <table border="1">
+    <strong>Itens Únicos:</strong> <span id="uniqueCount">0</span>
+
+    <table>
         <thead>
             <tr>
                 <th>Descrição</th>
+                <th>NCM</th>
                 <th>Quantidade Total</th>
                 <th>Valor Unitário</th>
                 <th>Valor Total</th>
@@ -198,5 +228,6 @@
         </thead>
         <tbody id="itemTable"></tbody>
     </table>
+
 </body>
 </html>
